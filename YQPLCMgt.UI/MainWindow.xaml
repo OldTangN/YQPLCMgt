@@ -1,0 +1,81 @@
+﻿<Window x:Class="YQPLCMgt.UI.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm ="clr-namespace:YQPLCMgt.UI.ViewModel"
+        xmlns:local="clr-namespace:YQPLCMgt.UI"
+        mc:Ignorable="d" Closed="Window_Closed"
+        Title="PLC管理端" Height="450" Width="800" Loaded="Window_Loaded">
+    <Window.Resources>
+        <vm:BrushConvert x:Key="converter"></vm:BrushConvert>
+    </Window.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="100"></RowDefinition>
+            <RowDefinition></RowDefinition>
+        </Grid.RowDefinitions>
+        <TabControl Grid.Row="0" BorderBrush="Black" BorderThickness="0 1 0 1" Height="100" HorizontalAlignment="Stretch" VerticalAlignment="Top">
+            <TabItem Header="运行" Width="60">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition></RowDefinition>
+                        <RowDefinition></RowDefinition>
+                    </Grid.RowDefinitions>
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock Text="挡停PLC地址：" Margin="30 0 0 0"></TextBlock>
+                        <TextBox Name="txtStopPLC_IP" Text="{Binding Path=IP_StopPLC,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" Width="100"></TextBox>
+                        <TextBlock>：</TextBlock>
+                        <TextBox Name="txtPLC_Port" Text="{Binding Path=Port_StopPLC,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" Width="50"></TextBox>
+                        <TextBlock Text="专机PLC地址：" Margin="30 0 0 0"></TextBlock>
+                        <TextBox Name="txt" Text="{Binding Path=IP_MachinePLC,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" Width="100"></TextBox>
+                        <TextBlock>：</TextBlock>
+                        <TextBox Name="txtMachinePLC_Port" Text="{Binding Path=Port_MachinePLC,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" Width="50"></TextBox>
+                        <Button Command="{Binding Path=StartCmd}" Content="监听" HorizontalAlignment="Left" Margin="30 0 0 0" Width="75"/>
+                        <Button Command="{Binding Path=StopCmd}" Content="停止" HorizontalAlignment="Left" Margin="30 0 0 0" Width="75"></Button>
+                    </StackPanel>
+                    <StackPanel Grid.Row="1" Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock VerticalAlignment="Center">挡停PLC连接状态：</TextBlock>
+                        <Ellipse Width="30" Height="30" Fill="{Binding Path=IsConnected_StopPLC,Converter={StaticResource converter}}"></Ellipse>
+                        <TextBlock VerticalAlignment="Center">专机PLC连接状态：</TextBlock>
+                        <Ellipse Width="30" Height="30" Fill="{Binding Path=IsConnected_MachinePLC,Converter={StaticResource converter}}"></Ellipse>
+                    </StackPanel>
+                </Grid>
+            </TabItem>
+            <TabItem Header="测试" Width="60">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition></RowDefinition>
+                        <RowDefinition></RowDefinition>
+                    </Grid.RowDefinitions>
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="10 0 0 0">
+                        <TextBlock Margin="0 0 0 0">IP:</TextBlock>
+                        <TextBox Name="txtIP" Margin="0 0 0 0">192.168.0.10</TextBox>
+                        <TextBlock Margin="20 0 0 0">Port:</TextBlock>
+                        <TextBox Name="txtPort" Margin="0 0 0 0">8501</TextBox>
+                        <Button Name="btnConnect" Content="连接" HorizontalAlignment="Left" Margin="20 0 0 0" Width="75" Click="BtnConnect_Click"/>
+                        <Button Name="btnDisConnect" Content="断开"  HorizontalAlignment="Left" Margin="20 0 0 0" Width="75" Click="BtnDisConnect_Click"/>
+
+                        <Border Margin="10 0 0 0" BorderThickness="1" BorderBrush="Black">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock >IP：</TextBlock>
+                                <TextBox Name="txtScannerIp" Width="150">192.168.100.100</TextBox>
+                                <Button x:Name="btnScanTest" Content="扫码触发测试" Margin="10 0 0 0"  Width="85" Click="BtnScanTest_Click"/>
+                                </StackPanel>
+                        </Border>
+                    </StackPanel>
+                    <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10 0 0 0">
+                        <ComboBox Name="cmbSend" SelectedValuePath="Value" DisplayMemberPath="Key" ItemsSource="{Binding Path=Source.ProtocolData}" SelectionChanged="CmbSend_SelectionChanged" Height="23" Margin="0 0 0 0"  Width="200"/>
+                        <TextBox Name="txtSend" Height="23" Margin="10 0 0 0" TextWrapping="Wrap" Text="?K" Width="200"/>
+                        <Button x:Name="btnSend" Content="发送" Margin="10 0 0 0"  Width="75" Click="BtnSend_Click"/>
+                        <Button x:Name="btnTest" Content="测试" Margin="10 0 0 0"  Width="75" Click="BtnTest_Click"/>
+                    
+                    </StackPanel>
+                </Grid>
+            </TabItem>
+        </TabControl>
+        <RichTextBox Background="White" Grid.Row="1" Name="rtxtMsg" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+        </RichTextBox>
+    </Grid>
+
+</Window>
