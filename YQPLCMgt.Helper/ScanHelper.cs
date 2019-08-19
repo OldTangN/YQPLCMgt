@@ -156,7 +156,7 @@ namespace YQPLCMgt.Helper
                 Send(bytStart);
                 Thread.Sleep(500);//扫描500ms
                 bytStop = Encoding.ASCII.GetBytes(strStop);
-                Send(bytStop);
+                Send(bytStop); 
             });
         }
     }
