@@ -10,6 +10,7 @@ using System.Windows.Media;
 using MyLogLib;
 using Newtonsoft.Json;
 using RabbitMQ;
+using RabbitMQ.YQMsg;
 using YQPLCMgt.Helper;
 
 namespace YQPLCMgt.UI.ViewModel
@@ -208,7 +209,7 @@ namespace YQPLCMgt.UI.ViewModel
             MsgBase msg = JsonConvert.DeserializeObject<MsgBase>(data);
             if (msg.MESSAGE_TYPE == "control")
             {
-                if (msg is PLCCtlMsg ctlMsg)
+                if (msg is ControlMsg ctlMsg)
                 {
                     var stop = _Source.StopDevices.FirstOrDefault(p => p.NO == ctlMsg.NO);
                     var machine = _Source.MachineDevices.FirstOrDefault(p => p.NO == ctlMsg.NO);
@@ -332,11 +333,11 @@ namespace YQPLCMgt.UI.ViewModel
                                     }
                                     #endregion
 
-                                    PLCMonitorMsg heartBeatMsg = new PLCMonitorMsg();
-                                    heartBeatMsg.DEVICE_TYPE = stop.DEVICE_TYPE;
-                                    heartBeatMsg.NO = stop.NO;
-                                    heartBeatMsg.STATUS = getValues[i];
-                                    string strJson = JsonConvert.SerializeObject(heartBeatMsg);
+                                    PLCMsg plcMsg = new PLCMsg();
+                                    plcMsg.DEVICE_TYPE = stop.DEVICE_TYPE;
+                                    plcMsg.NO = stop.NO;
+                                    plcMsg.STATUS = getValues[i];
+                                    string strJson = JsonConvert.SerializeObject(plcMsg);
                                     mqClient.SentMessage(strJson);
                                     Thread.Sleep(50);
                                 }
@@ -385,20 +386,20 @@ namespace YQPLCMgt.UI.ViewModel
                                 var machine = _Source.MachineDevices.FirstOrDefault(p => p.DMAddr_Status == dmAddr);
                                 if (machine != null)//专机状态PLC
                                 {
-                                    PLCMonitorMsg heartBeatMsg = new PLCMonitorMsg();
-                                    heartBeatMsg.DEVICE_TYPE = machine.DEVICE_TYPE;
-                                    heartBeatMsg.NO = machine.NO;
-                                    heartBeatMsg.STATUS = getValues[i];
+                                    PLCMsg plcMsg = new PLCMsg();
+                                    plcMsg.DEVICE_TYPE = machine.DEVICE_TYPE;
+                                    plcMsg.NO = machine.NO;
+                                    plcMsg.STATUS = getValues[i];
                                     if (!string.IsNullOrEmpty(machine.DMAddr_Pallet))//有单独的托盘DM
                                     {
                                         int idx = Convert.ToInt32(machine.DMAddr_Pallet.Replace("DM", "")) - start;
-                                        heartBeatMsg.PALLET_COUNT = getValues[idx];
+                                        plcMsg.PALLET_COUNT = getValues[idx];
                                     }
                                     else
                                     {
-                                        heartBeatMsg.PALLET_COUNT = heartBeatMsg.STATUS > 0 ? 1 : 0;
+                                        plcMsg.PALLET_COUNT = plcMsg.STATUS > 0 ? 1 : 0;
                                     }
-                                    string strJson = JsonConvert.SerializeObject(heartBeatMsg);
+                                    string strJson = JsonConvert.SerializeObject(plcMsg);
                                     mqClient.SentMessage(strJson);
                                     Thread.Sleep(50);
                                 }

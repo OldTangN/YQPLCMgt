@@ -52,13 +52,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ComParamter.cs" />
-    <Compile Include="Message\BarcodeMsg.cs" />
     <Compile Include="Device\DeviceBase.cs" />
     <Compile Include="Device\MachineDevice.cs" />
-    <Compile Include="Message\PLCCtlMsg.cs" />
-    <Compile Include="Message\PLCMonitorMsg.cs" />
-    <Compile Include="Message\HeartBeatMsg.cs" />
-    <Compile Include="Message\MsgBase.cs" />
     <Compile Include="PLCResponse.cs" />
     <Compile Include="PLCHelper.cs" />
     <Compile Include="Device\StopDevice.cs" />
