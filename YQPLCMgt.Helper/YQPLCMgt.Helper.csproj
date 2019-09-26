@@ -63,7 +63,9 @@
     <Compile Include="PLCHelper.cs" />
     <Compile Include="Device\StopDevice.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ScanHelper.cs" />
+    <Compile Include="ScannerHelper.cs" />
+    <Compile Include="SerialScannerHelper.cs" />
+    <Compile Include="SocketScannerHelper.cs" />
     <Compile Include="Device\ScanDevice.cs" />
     <Compile Include="XMLHelper.cs" />
   </ItemGroup>

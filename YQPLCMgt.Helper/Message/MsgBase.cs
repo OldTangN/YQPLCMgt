@@ -26,6 +26,6 @@ namespace YQPLCMgt.Helper
         /// <summary>
         /// 时间戳
         /// </summary>
-        public string time_stamp { get; set; }
+        public string time_stamp { get; set; } = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
     }
 }

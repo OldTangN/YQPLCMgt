@@ -13,7 +13,7 @@ namespace YQPLCMgt.Helper
     {
         public PLCCtlMsg()
         {
-
+            this.MESSAGE_TYPE = "control";
         }
         /// <summary>
         /// 控制命令

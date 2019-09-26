@@ -10,8 +10,7 @@ namespace YQPLCMgt.Helper
     {
         public PLCMonitorMsg()
         {
-            this.MESSAGE_TYPE = "plc";
-            this.time_stamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+            this.MESSAGE_TYPE = "plc";            
         }
         public int PALLET_COUNT { get; set; }
 

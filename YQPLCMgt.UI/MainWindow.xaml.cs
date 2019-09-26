@@ -117,27 +117,44 @@ namespace YQPLCMgt.UI
 
         private void BtnTest_Click(object sender, RoutedEventArgs e)
         {
-            //SCANMsg msg = new SCANMsg();
-            //msg.NO = "23";
-            //msg.data = new List<string>() { "aaaaa", "bbbbb" };
-            //string strJson = JsonConvert.SerializeObject(msg);
-            //AppendText(strJson);
-            //msg = new SCANMsg();
-            //strJson = JsonConvert.SerializeObject(msg);
-            //AppendText(strJson);
-            //string ss = "{\"data\":[\"aaaaa\",\"bbbbb\"],\"DEVICE_TYPE\":\"01\",\"NO\":\"23\",\"MESSAGE_TYPE\":null,\"time_stamp\":null}";
-            //SCANMsg msg1 = JsonConvert.DeserializeObject<SCANMsg>(ss);
-            //SeperatorMsg msg2 = JsonConvert.DeserializeObject<SeperatorMsg>(ss);
+            
+            TestMsg msg = new TestMsg();
+            msg.DEVICE_TYPE = "E101";
+            msg.NO = "1";
+            msg.MESSAGE_TYPE = "execute";
+            msg.Data.Add(new Data() { WORK_ID = "1", Bar_code = "bar1", result = "0" });
+            msg.Data.Add(new Data() { WORK_ID = "2", Bar_code = "bar2", result = "0" });
+            msg.Data.Add(new Data() { WORK_ID = "3", Bar_code = "bar3", result = "0" });
+            string strJson = JsonConvert.SerializeObject(msg);//转Json字符串
+            AppendText(strJson);//界面日志
+
+            string str =
+"{" + Environment.NewLine+
+"\"DEVICE_TYPE\":\"1\"," + Environment.NewLine +
+"\"NO\":\"1\"," + Environment.NewLine +
+"\"MESSAGE_TYPE\":\"execute\"," + Environment.NewLine +
+"\"DATA\":" + Environment.NewLine +
+"[" + Environment.NewLine +
+"{\"WORK_ID\":\"1\",\"Bar_code\":\"12757222006\",\"result\":\"0\"}," + Environment.NewLine +
+"{\"WORK_ID\":\"2\",\"Bar_code\":\"12757222007\",\"result\":\"0\"}," + Environment.NewLine +
+"{\"WORK_ID\":\"3\",\"Bar_code\":\"12757222008\",\"result\":\"0\"}" + Environment.NewLine +
+"]," + Environment.NewLine +
+"\"time_stamp\":\"2019-06-13 03:28:54\"" + Environment.NewLine +
+"}";
+
+            AppendText(str);
+            TestMsg msg1 = JsonConvert.DeserializeObject<TestMsg>(str);//转实体对象
+            MessageBox.Show(msg1.MESSAGE_TYPE);
         }
 
-        private ScanHelper scan;
+        private SocketScannerHelper scan;
         private Thread scanThread;
         private int idx = 0;
         private void BtnScanTest_Click(object sender, RoutedEventArgs e)
         {
             scan?.DisConnect();
             try { scanThread?.Abort(); } catch { };
-            scan = new ScanHelper(new ScanDevice("E00102", "人工PCB工位挡停前扫码枪", txtScannerIp.Text));
+            scan = new SocketScannerHelper(new ScanDevice("E00102", "人工PCB工位挡停前扫码枪", txtScannerIp.Text));
             scan.OnScanned += (dev, data) =>
             {
                 AppendText(idx++ + " -- " + data);

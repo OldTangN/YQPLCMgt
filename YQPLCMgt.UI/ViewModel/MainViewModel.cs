@@ -50,7 +50,7 @@ namespace YQPLCMgt.UI.ViewModel
         /// <summary>
         /// 扫码枪
         /// </summary>
-        private List<ScanHelper> scanHelpers;
+        private List<ScannerHelper> scanHelpers;
         #endregion
 
 
@@ -100,11 +100,19 @@ namespace YQPLCMgt.UI.ViewModel
             {
                 scanHelpers.ForEach(p => p.DisConnect());
             }
-            scanHelpers = new List<ScanHelper>();
+            scanHelpers = new List<ScannerHelper>();
             string errComNames = "";
             foreach (var item in _Source.ScanDevices)
             {
-                ScanHelper scanHelper = new ScanHelper(item);
+                ScannerHelper scanHelper;
+                if (item.IOType == ScannerIO.Socket)
+                {
+                    scanHelper = new SocketScannerHelper(item);
+                }
+                else
+                {
+                    scanHelper = new SerialScannerHelper(item);
+                }
                 scanHelper.OnScanned += ScannedCallback;
                 scanHelper.OnError += ShowMsg;
                 if (!scanHelper.Connect())
