@@ -19,7 +19,7 @@ namespace YQPLCMgt.Helper
             {
                 this.DEVICE_TYPE = e.Message;
             }
-            this.NAME = name;
+            this.NAME = name;           
         }
 
         /// <summary>
@@ -36,5 +36,7 @@ namespace YQPLCMgt.Helper
         /// 设备名称
         /// </summary>
         public string NAME { get; set; }
+
+       
     }
 }

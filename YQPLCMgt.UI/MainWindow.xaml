@@ -17,30 +17,19 @@
         </Grid.RowDefinitions>
         <TabControl Grid.Row="0" BorderBrush="Black" BorderThickness="0 1 0 1" Height="100" HorizontalAlignment="Stretch" VerticalAlignment="Top">
             <TabItem Header="运行" Width="60">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition></RowDefinition>
-                        <RowDefinition></RowDefinition>
-                    </Grid.RowDefinitions>
-                    <StackPanel Grid.Row="0" Orientation="Horizontal" VerticalAlignment="Center">
-                        <TextBlock Text="挡停PLC地址：" Margin="30 0 0 0"></TextBlock>
-                        <TextBox Name="txtStopPLC_IP" Text="{Binding Path=IP_StopPLC,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" Width="100"></TextBox>
-                        <TextBlock>：</TextBlock>
-                        <TextBox Name="txtPLC_Port" Text="{Binding Path=Port_StopPLC,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" Width="50"></TextBox>
-                        <TextBlock Text="专机PLC地址：" Margin="30 0 0 0"></TextBlock>
-                        <TextBox Name="txt" Text="{Binding Path=IP_MachinePLC,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" Width="100"></TextBox>
-                        <TextBlock>：</TextBlock>
-                        <TextBox Name="txtMachinePLC_Port" Text="{Binding Path=Port_MachinePLC,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" Width="50"></TextBox>
-                        <Button Command="{Binding Path=StartCmd}" Content="监听" HorizontalAlignment="Left" Margin="30 0 0 0" Width="75"/>
-                        <Button Command="{Binding Path=StopCmd}" Content="停止" HorizontalAlignment="Left" Margin="30 0 0 0" Width="75"></Button>
-                    </StackPanel>
-                    <StackPanel Grid.Row="1" Orientation="Horizontal" VerticalAlignment="Center">
-                        <TextBlock VerticalAlignment="Center">挡停PLC连接状态：</TextBlock>
-                        <Ellipse Width="30" Height="30" Fill="{Binding Path=IsConnected_StopPLC,Converter={StaticResource converter}}"></Ellipse>
-                        <TextBlock VerticalAlignment="Center">专机PLC连接状态：</TextBlock>
-                        <Ellipse Width="30" Height="30" Fill="{Binding Path=IsConnected_MachinePLC,Converter={StaticResource converter}}"></Ellipse>
-                    </StackPanel>
-                </Grid>
+                <StackPanel Grid.Row="1" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button Command="{Binding Path=StartCmd}" Content="监听" HorizontalAlignment="Left" Margin="30 0 0 0" Width="75"/>
+                    <Button Command="{Binding Path=StopCmd}" Content="停止" HorizontalAlignment="Left" Margin="30 0 30 0" Width="75"></Button>
+
+                    <TextBlock VerticalAlignment="Center">PLC连接状态：</TextBlock>
+                    <TextBlock VerticalAlignment="Center">PLC-1</TextBlock>
+                    <Ellipse Width="30" Height="30" Fill="{Binding Path=PLC_Status[0],Converter={StaticResource converter}}"></Ellipse>
+                    <TextBlock VerticalAlignment="Center">PLC-2</TextBlock>
+                    <Ellipse Width="30" Height="30" Fill="{Binding Path=PLC_Status[1],Converter={StaticResource converter}}"></Ellipse>
+                    <TextBlock VerticalAlignment="Center">PLC-3</TextBlock>
+                    <Ellipse Width="30" Height="30" Fill="{Binding Path=PLC_Status[2],Converter={StaticResource converter}}"></Ellipse>
+                    <Button Content="Button" Width="75" Click="Button_Click"/>
+                </StackPanel>
             </TabItem>
             <TabItem Header="测试" Width="60">
                 <Grid>
@@ -61,7 +50,7 @@
                                 <TextBlock >IP：</TextBlock>
                                 <TextBox Name="txtScannerIp" Width="150">192.168.100.100</TextBox>
                                 <Button x:Name="btnScanTest" Content="扫码触发测试" Margin="10 0 0 0"  Width="85" Click="BtnScanTest_Click"/>
-                                </StackPanel>
+                            </StackPanel>
                         </Border>
                     </StackPanel>
                     <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10 0 0 0">
@@ -69,7 +58,7 @@
                         <TextBox Name="txtSend" Height="23" Margin="10 0 0 0" TextWrapping="Wrap" Text="?K" Width="200"/>
                         <Button x:Name="btnSend" Content="发送" Margin="10 0 0 0"  Width="75" Click="BtnSend_Click"/>
                         <Button x:Name="btnTest" Content="测试" Margin="10 0 0 0"  Width="75" Click="BtnTest_Click"/>
-                    
+
                     </StackPanel>
                 </Grid>
             </TabItem>

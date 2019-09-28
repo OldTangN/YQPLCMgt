@@ -9,10 +9,11 @@ namespace YQPLCMgt.Helper
 
     public class MachineDevice : DeviceBase
     {
-        public MachineDevice(string no, string name, string dmAddrPallet, string dmAddrStatus) : base(no, name)
+        public MachineDevice(string no, string name, string dmAddrPallet, string dmAddrStatus, string plc_ip) : base(no, name)
         {
             this.DMAddr_Pallet = dmAddrPallet;
             this.DMAddr_Status = dmAddrStatus;
+            this.PLCIP = plc_ip;
         }
 
         /// <summary>
@@ -24,6 +25,8 @@ namespace YQPLCMgt.Helper
         /// 状态DM地址
         /// </summary>
         public string DMAddr_Status { get; set; }
+
+        public string PLCIP { get; set; }
     }
 
 }

@@ -38,7 +38,7 @@ namespace YQPLCMgt.UI
             viewModel = new MainViewModel();
             viewModel.OnShowMsg += AppendText;
             this.DataContext = viewModel;
-            Task.Run(() => { viewModel.Init(); });
+            //Task.Run(() => { viewModel.Init(); });
         }
 
         private PLCHelper plc;
@@ -148,12 +148,11 @@ namespace YQPLCMgt.UI
         }
 
         private SocketScannerHelper scan;
-        private Thread scanThread;
+      
         private int idx = 0;
         private void BtnScanTest_Click(object sender, RoutedEventArgs e)
         {
             scan?.DisConnect();
-            try { scanThread?.Abort(); } catch { };
             scan = new SocketScannerHelper(new ScanDevice("E00102", "人工PCB工位挡停前扫码枪", txtScannerIp.Text));
             scan.OnScanned += (dev, data) =>
             {
@@ -188,6 +187,11 @@ namespace YQPLCMgt.UI
                 return;
             }
             scan.TriggerScan();//触发扫码枪指令
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            Task.Run(() => { viewModel.Init(); });
         }
     }
 }

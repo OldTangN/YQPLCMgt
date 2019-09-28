@@ -85,6 +85,5 @@ namespace YQPLCMgt.Helper
                 Send(bytStop);
             });
         }
-
     }
 }

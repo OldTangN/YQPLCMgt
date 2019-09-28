@@ -19,7 +19,7 @@ namespace YQPLCMgt.UI.ViewModel
         /// <param name="field"></param>
         /// <param name="newValue"></param>
         /// <param name="propertyName"></param>
-       protected void Set<T>(ref T field, T newValue, [System.Runtime.CompilerServices.CallerMemberName] string propertyName = "")
+        protected void Set<T>(ref T field, T newValue, [System.Runtime.CompilerServices.CallerMemberName] string propertyName = "")
         {
             if (!EqualityComparer<T>.Default.Equals(field, newValue))
             {
@@ -32,9 +32,9 @@ namespace YQPLCMgt.UI.ViewModel
         /// 触发属性改变事件
         /// </summary>
         /// <param name="propertyName"></param>
-        void RaisePropertyChanged(string propertyName)
+        public void RaisePropertyChanged(string propertyName)
         {
-           PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
         //public string GetPropertyName<T>(Expression<Func<T>> propertyExpression)

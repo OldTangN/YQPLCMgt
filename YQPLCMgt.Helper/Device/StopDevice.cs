@@ -8,10 +8,11 @@ namespace YQPLCMgt.Helper
 {
     public class StopDevice : DeviceBase
     {
-        public StopDevice(string no, string name, string dmAddrStatus,string scan_device_no) : base(no, name)
+        public StopDevice(string no, string name, string dmAddrStatus,string scan_device_no,string plc_ip) : base(no, name)
         {
             this.DMAddr_Status = dmAddrStatus;
             this.Scan_Device_No = scan_device_no;
+            this.PLCIP = plc_ip;
         }
 
         /// <summary>
@@ -28,5 +29,7 @@ namespace YQPLCMgt.Helper
         /// 上次状态
         /// </summary>
         public int LastDMAddrStatus { get; set; }
+
+        public string PLCIP { get; set; }
     }
 }

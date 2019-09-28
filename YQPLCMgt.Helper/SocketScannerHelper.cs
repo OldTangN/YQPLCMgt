@@ -17,9 +17,7 @@ namespace YQPLCMgt.Helper
         public SocketScannerHelper(ScanDevice scanSetting)
         {
             this.Scanner = scanSetting;
-            socket = new Socket(SocketType.Stream, ProtocolType.Tcp);
-            socket.ReceiveTimeout = 1000;//1s接收超时
-            socket.SendTimeout = 1000;//1s发送超时
+         
         }
 
         private List<byte> Buffer = new List<byte>();
@@ -30,6 +28,9 @@ namespace YQPLCMgt.Helper
             try
             {
                 cancellation = new CancellationTokenSource();
+                socket = new Socket(SocketType.Stream, ProtocolType.Tcp);
+                socket.ReceiveTimeout = 1000;//1s接收超时
+                socket.SendTimeout = 1000;//1s发送超时
                 socket.Connect(new IPEndPoint(IPAddress.Parse(Scanner.IP), Scanner.Port));
                 Task tsk = new Task(() =>
                 {
@@ -56,8 +57,8 @@ namespace YQPLCMgt.Helper
                     byte[] buffer = new byte[1024];
                     int len = socket.Receive(buffer);
                     byte[] bytArrData = buffer.Take(len).ToArray();
-                    string strCodes = Encoding.ASCII.GetString(bytArrData);
-                    RaiseScanned(Scanner, strCodes);
+                    string data = Encoding.ASCII.GetString(bytArrData);
+                    RaiseScanned(Scanner, data);
                 }
                 catch (SocketException ex)//接收超时异常不处理
                 {
