@@ -1,4 +1,7 @@
-﻿using System;
+﻿using ManagedLXEAPI;
+using Newtonsoft.Json;
+using RabbitMQ;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,9 +16,6 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using ManagedLXEAPI;
-using Newtonsoft.Json;
-using RabbitMQ;
 using YQPLCMgt.Helper;
 using YQPLCMgt.UI.ViewModel;
 
@@ -46,7 +46,7 @@ namespace YQPLCMgt.UI
         private void BtnConnect_Click(object sender, RoutedEventArgs e)
         {
             plc?.DisConnect();
-            plc = new PLCHelper(txtIP.Text, Convert.ToInt32(txtPort.Text));
+            plc = new PLCHelper(txtIP.Text, Convert.ToInt32(txtPort.Text), true);
             plc.OnShowMsg += AppendText;
             bool rlt = plc.Connect();
             if (rlt)
@@ -117,7 +117,7 @@ namespace YQPLCMgt.UI
 
         private void BtnTest_Click(object sender, RoutedEventArgs e)
         {
-            
+
             TestMsg msg = new TestMsg();
             msg.DEVICE_TYPE = "E101";
             msg.NO = "1";
@@ -129,7 +129,7 @@ namespace YQPLCMgt.UI
             AppendText(strJson);//界面日志
 
             string str =
-"{" + Environment.NewLine+
+"{" + Environment.NewLine +
 "\"DEVICE_TYPE\":\"1\"," + Environment.NewLine +
 "\"NO\":\"1\"," + Environment.NewLine +
 "\"MESSAGE_TYPE\":\"execute\"," + Environment.NewLine +
@@ -148,36 +148,23 @@ namespace YQPLCMgt.UI
         }
 
         private SocketScannerHelper scan;
-      
+
         private int idx = 0;
         private void BtnScanTest_Click(object sender, RoutedEventArgs e)
         {
             scan?.DisConnect();
-            scan = new SocketScannerHelper(new ScanDevice("E00102", "人工PCB工位挡停前扫码枪", txtScannerIp.Text));
+            scan = new SocketScannerHelper(new ScanDevice("E00102", "人工PCB工位挡停前扫码枪", txtScannerIp.Text, 9004));
             scan.OnScanned += (dev, data) =>
             {
-                AppendText(idx++ + " -- " + data);
-                try
+                //格式条码+\r
+                string[] codes = data.Split('\r');
+                foreach (var barcode in codes)
                 {
-                    List<Barcode> lstBarcodes = new List<Barcode>();
-                    foreach (string oneData in data.Split(','))
+                    if (string.IsNullOrEmpty(barcode) || barcode.Length < 4)//TODO:条码长度过滤非法数据
                     {
-                        Barcode barcode = new Barcode()
-                        {
-                            Code = oneData.Split(':')[0],
-                            X = Convert.ToInt32(oneData.Split(':')[1].Split('/')[0]),
-                            Y = Convert.ToInt32(oneData.Split(':')[1].Split('/')[1])
-                        };
-                        lstBarcodes.Add(barcode);
+                        continue;
                     }
-                    lstBarcodes.Sort((b1, b2) =>
-                    {
-                        return b1.Y - b2.Y;//从上到下排序
-                    });
-                    lstBarcodes.ForEach(p => AppendText(p.Code));
-                }
-                catch (Exception)
-                {
+                    AppendText(idx++ + " -- " + barcode);
                 }
             };
             scan.OnError += AppendText;

@@ -42,7 +42,7 @@ namespace YQPLCMgt.UI.ViewModel
         /// <summary>
         /// PLC
         /// </summary>
-        private PLCHelper[] plcs = new PLCHelper[3];
+        private PLCHelper[] plcs;
 
 
         /// <summary>
@@ -61,7 +61,7 @@ namespace YQPLCMgt.UI.ViewModel
         {
             InitMQ();
             InitPLC();
-            InitScan();
+            //InitScan();
             InitCompleted = true;
         }
 
@@ -135,13 +135,15 @@ namespace YQPLCMgt.UI.ViewModel
             ShowMsg("初始化PLC...");
             string[] plc_ips = new string[]
             {
-                "192.168.0.10","192.168.0.20","192.168.0.30"
+                "192.168.0.10"//,"192.168.0.20",//"192.168.0.30"
             };
             IsAllPLCConnected = true;
-            for (int i = 0; i < 3; i++)
+            plcs?.ToList().ForEach(p => p.DisConnect());
+            plcs = new PLCHelper[plc_ips.Length];
+            PLC_Status = new bool[plc_ips.Length];
+            for (int i = 0; i < plcs.Length; i++)
             {
-                plcs[i]?.DisConnect();
-                plcs[i] = new PLCHelper(plc_ips[i], 8501);
+                plcs[i] = new PLCHelper(plc_ips[i], 8501, true);
                 plcs[i].OnShowMsg += ShowMsg;
                 PLC_Status[i] = plcs[i].Connect();
                 IsAllPLCConnected &= PLC_Status[i];
@@ -172,7 +174,7 @@ namespace YQPLCMgt.UI.ViewModel
                     BarcodeMsg msg = new BarcodeMsg(scan.NO);
                     msg.BAR_CODE = barcode;
                     string strJson = JsonConvert.SerializeObject(msg);
-                    mqClient.SentMessage(strJson);
+                    mqClient?.SentMessage(strJson);
                 }
                 catch (Exception ex)
                 {
@@ -257,7 +259,7 @@ namespace YQPLCMgt.UI.ViewModel
             respMsg.DEVICE_TYPE = DEVICE_TYPE;
             respMsg.NO = NO;
             respMsg.STATUS = STATUS;
-            mqClient.SentMessage(JsonConvert.SerializeObject(respMsg));
+            mqClient?.SentMessage(JsonConvert.SerializeObject(respMsg));
         }
 
         public event Action<string> OnShowMsg;
@@ -281,8 +283,9 @@ namespace YQPLCMgt.UI.ViewModel
         private void Start()
         {
             cancelToken = new CancellationTokenSource();
-            Task.Run(new Action(MonitorStopDevice), cancelToken.Token);
-            Task.Run(new Action(MonitorMachine), cancelToken.Token);
+            Task.Run(new Action(MonitorDevice), cancelToken.Token);
+            //Task.Run(new Action(MonitorStopDevice), cancelToken.Token);
+            //Task.Run(new Action(MonitorMachine), cancelToken.Token);
         }
 
         private bool CanStart()
@@ -290,76 +293,11 @@ namespace YQPLCMgt.UI.ViewModel
             return InitCompleted && IsAllPLCConnected;
         }
 
-        private void MonitorStopDevice()
+        private void MonitorDevice()
         {
             int start = 100;
-            int count = 25;
-            while (!cancelToken.IsCancellationRequested)
-            {
-                Thread.Sleep(2000);
-                try
-                {
-                    foreach (var plc in plcs)
-                    {
-                        PLCResponse response = plc.Send($"RDS DM{start}.U {count}\r");
-                        if (response.HasError)
-                        {
-                            ShowMsg(response.ErrorMsg);
-                        }
-                        else
-                        {
-                            if (_Source.ErrorMsg.Keys.Contains(response.Text))
-                            {
-                                ShowMsg(_Source.ErrorMsg[response.Text]);
-                            }
-                            else
-                            {
-                                string[] getStrs = response.Text.Split(' ').ToArray();
-                                int[] getValues = new int[getStrs.Length];
-                                for (int i = 0; i < getValues.Length; i++)
-                                {
-                                    getValues[i] = Convert.ToInt32(getStrs[i]);
-                                    #region 上报状态至MQ服务器
-                                    //获取挡停
-                                    var stop = _Source.StopDevices.FirstOrDefault(p => p.DMAddr_Status == "DM" + (start + i) && plc.IP == p.PLCIP);
-                                    if (stop != null)//专机状态PLC
-                                    {
-                                        #region 根据挡停状态触发扫码枪
-                                        if (getValues[i] == 1 && !string.IsNullOrEmpty(stop.Scan_Device_No))//有托盘
-                                        {
-                                            //获取扫码枪
-                                            var scan = scanHelpers.FirstOrDefault(p => p.Scanner.NO == stop.Scan_Device_No);
-                                            scan?.TriggerScan();//触发扫码枪，进行扫码
-                                        }
-                                        #endregion
-
-                                        PLCMsg plcMsg = new PLCMsg();
-                                        plcMsg.DEVICE_TYPE = stop.DEVICE_TYPE;
-                                        plcMsg.NO = stop.NO;
-                                        plcMsg.STATUS = getValues[i];
-                                        string strJson = JsonConvert.SerializeObject(plcMsg);
-                                        mqClient.SentMessage(strJson);
-                                        Thread.Sleep(50);
-                                    }
-                                    #endregion
-                                }
-                            }
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    MyLog.WriteLog("MonitorStopDevice异常！", ex);
-                    ShowMsg(ex.Message);
-                }
-            }
-        }
-
-        private void MonitorMachine()
-        {
-            int start = 200;
-            int count = 45;
-            while (!cancelToken.IsCancellationRequested)
+            int count = 200;
+            while (cancelToken != null && !cancelToken.IsCancellationRequested)
             {
                 try
                 {
@@ -403,10 +341,43 @@ namespace YQPLCMgt.UI.ViewModel
                                             plcMsg.PALLET_COUNT = plcMsg.STATUS > 0 ? 1 : 0;
                                         }
                                         string strJson = JsonConvert.SerializeObject(plcMsg);
-                                        mqClient.SentMessage(strJson);
+                                        mqClient?.SentMessage(strJson);
                                         Thread.Sleep(50);
                                     }
+
+                                    //获取挡停
+                                    var stop = _Source.StopDevices.FirstOrDefault(p => p.DMAddr_Status == dmAddr && plc.IP == p.PLCIP);
+                                    if (stop != null)//专机状态PLC
+                                    {
+                                        #region 根据挡停状态触发扫码枪
+                                        if (getValues[i] == 1 && !string.IsNullOrEmpty(stop.Scan_Device_No))//有托盘
+                                        {
+                                            //获取扫码枪
+                                            var scan = scanHelpers?.FirstOrDefault(p => p.Scanner.NO == stop.Scan_Device_No);
+                                            scan?.TriggerScan();//触发扫码枪，进行扫码
+                                        }
+                                        #endregion
+
+                                        PLCMsg plcMsg = new PLCMsg();
+                                        plcMsg.DEVICE_TYPE = stop.DEVICE_TYPE;
+                                        plcMsg.NO = stop.NO;
+                                        plcMsg.STATUS = getValues[i];
+                                        string strJson = JsonConvert.SerializeObject(plcMsg);
+                                        mqClient?.SentMessage(strJson);
+                                        Thread.Sleep(50);
+                                    }
+
                                     #endregion
+
+                                    //TODO:测试代码，直接发放行命令
+                                    if (getValues[i] == 1)
+                                    {
+                                        var resp = plc.Send($"WR {dmAddr}.U 2\r");
+                                        if (resp.HasError)
+                                        {
+                                            ShowMsg(resp.ErrorMsg);
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -414,13 +385,10 @@ namespace YQPLCMgt.UI.ViewModel
                 }
                 catch (Exception ex)
                 {
-                    MyLog.WriteLog("MonitorMachine异常！", ex);
-                    ShowMsg(ex.Message);
+                    MyLog.WriteLog("MonitorDevice异常！", ex);
+                    ShowMsg("MonitorDevice异常！" + ex.Message + "\r" + ex.StackTrace);
                 }
-                finally
-                {
-                    Thread.Sleep(2000);
-                }
+                Thread.Sleep(2000);
             }
         }
 

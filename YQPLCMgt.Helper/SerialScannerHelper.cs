@@ -17,7 +17,7 @@ namespace YQPLCMgt.Helper
         public SerialScannerHelper(ScanDevice scanSetting)
         {
             this.Scanner = scanSetting;
-            serial = new SerialPort(Scanner.ComName, 9600, Parity.None, 8, StopBits.One);
+            //serial = new SerialPort(Scanner.ComName, 9600, Parity.None, 8, StopBits.One);
         }
 
         private List<byte> Buffer = new List<byte>();
@@ -49,9 +49,9 @@ namespace YQPLCMgt.Helper
             }
             catch (Exception ex)
             {
-                string errMsg = $"连接扫码枪{Scanner.ComName}失败！";
-                MyLog.WriteLog(errMsg, ex);
-                RaiseError(errMsg);
+                //string errMsg = $"连接扫码枪{Scanner.ComName}失败！";
+                //MyLog.WriteLog(errMsg, ex);
+                //RaiseError(errMsg);
             }
             return false;
         }
@@ -77,9 +77,9 @@ namespace YQPLCMgt.Helper
             }
             catch (Exception ex)
             {
-                string errMsg = $"向{Scanner.ComName}发送命令失败！";
-                MyLog.WriteLog(errMsg, ex);
-                RaiseError(errMsg);
+                //string errMsg = $"向{Scanner.ComName}发送命令失败！";
+                //MyLog.WriteLog(errMsg, ex);
+                //RaiseError(errMsg);
             }
             return true;
         }

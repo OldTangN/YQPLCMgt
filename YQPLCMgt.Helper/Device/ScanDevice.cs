@@ -8,7 +8,7 @@ namespace YQPLCMgt.Helper
 {
     public class ScanDevice : DeviceBase
     {
-        public ScanDevice(string no, string name, string ip, int port) : base(no, name)
+        public ScanDevice(string no, string name, string ip, int port = 9004) : base(no, name)
         {
             this.IP = ip;
             this.Port = port;
