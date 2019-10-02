@@ -39,6 +39,10 @@ namespace YQPLCMgt.UI
             viewModel.OnShowMsg += AppendText;
             this.DataContext = viewModel;
             //Task.Run(() => { viewModel.Init(); });
+            List<DeviceBase> lstDevices = new List<DeviceBase>();
+            lstDevices.AddRange(viewModel.Source.StopDevices);
+            lstDevices.AddRange(viewModel.Source.MachineDevices);
+            cmbDevices.ItemsSource = lstDevices;
         }
 
         private PLCHelper plc;
@@ -80,7 +84,7 @@ namespace YQPLCMgt.UI
         {
             rtxtMsg.Dispatcher.Invoke(() =>
             {
-                if (rtxtMsg.Document.Blocks.Count >500)
+                if (rtxtMsg.Document.Blocks.Count > 500)
                 {
                     rtxtMsg.Document.Blocks.Clear();
                 }
@@ -93,7 +97,7 @@ namespace YQPLCMgt.UI
                     rtxtMsg.AppendText(txt + "\r");
                 }
                 rtxtMsg.ScrollToEnd();
-                
+
             });
 
         }
@@ -185,6 +189,35 @@ namespace YQPLCMgt.UI
         private void Button_Click(object sender, RoutedEventArgs e)
         {
             Task.Run(() => { viewModel.Init(); });
+        }
+
+        private void BtnDeviceCtl_Click(object sender, RoutedEventArgs e)
+        {
+            if (plc == null || !plc.IsConnected)
+            {
+                return;
+            }
+            string strCmd = "";
+            if (chkRead.IsChecked.GetValueOrDefault())
+            {
+                strCmd = $"RD {cmbDevices.SelectedValue}.U\r";
+            }
+            else
+            {
+                strCmd = $"WR {cmbDevices.SelectedValue}.U {txtRWValue.Text}\r";
+            }
+            var rlt = plc.Send(strCmd);
+            if (rlt.HasError)
+            {
+                MessageBox.Show(rlt.ErrorMsg);
+            }
+            else
+            {
+                if (chkRead.IsChecked.GetValueOrDefault())
+                {
+                    txtRWValue.Text = rlt.Text;
+                }
+            }
         }
     }
 }
