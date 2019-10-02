@@ -80,6 +80,10 @@ namespace YQPLCMgt.UI
         {
             rtxtMsg.Dispatcher.Invoke(() =>
             {
+                if (rtxtMsg.Document.Blocks.Count >500)
+                {
+                    rtxtMsg.Document.Blocks.Clear();
+                }
                 if (txt.EndsWith("\r"))
                 {
                     rtxtMsg.AppendText(txt);
@@ -89,7 +93,9 @@ namespace YQPLCMgt.UI
                     rtxtMsg.AppendText(txt + "\r");
                 }
                 rtxtMsg.ScrollToEnd();
+                
             });
+
         }
 
         private void CmbSend_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -153,7 +159,7 @@ namespace YQPLCMgt.UI
         private void BtnScanTest_Click(object sender, RoutedEventArgs e)
         {
             scan?.DisConnect();
-            scan = new SocketScannerHelper(new ScanDevice("E00102", "人工PCB工位挡停前扫码枪", txtScannerIp.Text, 9004));
+            scan = new SocketScannerHelper(new ScanDevice("E00102", "人工PCB工位挡停前扫码枪", combScanner.SelectedValue.ToString(), 9004));
             scan.OnScanned += (dev, data) =>
             {
                 //格式条码+\r

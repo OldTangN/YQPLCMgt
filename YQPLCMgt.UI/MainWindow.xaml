@@ -6,7 +6,7 @@
         xmlns:vm ="clr-namespace:YQPLCMgt.UI.ViewModel"
         xmlns:local="clr-namespace:YQPLCMgt.UI"
         mc:Ignorable="d" Closed="Window_Closed"
-        Title="PLC管理端" Height="450" Width="800" Loaded="Window_Loaded">
+        Title="PLC管理端" Height="600" Width="1000" Loaded="Window_Loaded">
     <Window.Resources>
         <vm:BrushConvert x:Key="converter"></vm:BrushConvert>
     </Window.Resources>
@@ -18,20 +18,20 @@
         <TabControl Grid.Row="0" BorderBrush="Black" BorderThickness="0 1 0 1" Height="100" HorizontalAlignment="Stretch" VerticalAlignment="Top">
             <TabItem Header="运行" Width="60">
                 <StackPanel Grid.Row="1" Orientation="Horizontal" VerticalAlignment="Center">
-                    <Button Command="{Binding Path=StartCmd}" Content="监听" HorizontalAlignment="Left" Margin="10 0" Width="75"/>
-                    <TextBox Name="txtPortTmp" Height="23" TextWrapping="Wrap" Text="{Binding Path=CurrPort,UpdateSourceTrigger=PropertyChanged}" Width="40"/>
-                    <Button Command="{Binding Path=StopCmd}" Content="停止" HorizontalAlignment="Left" Margin="10 0" Width="75"></Button>
+                    <ComboBox Height="22"  Width="120" ItemsSource="{Binding LstPLCs, UpdateSourceTrigger=PropertyChanged}" IsSynchronizedWithCurrentItem="True"/>
+                    <Button Command="{Binding StartCmd}" Content="开始" HorizontalAlignment="Left" Margin="10 0" Width="75"/>
+                    <Button Command="{Binding StopCmd}" Content="停止" HorizontalAlignment="Left" Margin="10 0" Width="75"/>
 
-                    <TextBlock VerticalAlignment="Center">PLC连接状态：</TextBlock>
-                    <TextBlock VerticalAlignment="Center">PLC-1</TextBlock>
-                    <Ellipse Width="30" Height="30" Fill="{Binding Path=PLC_Status[0],Converter={StaticResource converter}}"></Ellipse>
-                    <TextBlock VerticalAlignment="Center">PLC-2</TextBlock>
-                    <Ellipse Width="30" Height="30" Fill="{Binding Path=PLC_Status[1],Converter={StaticResource converter}}"></Ellipse>
-                    <TextBlock VerticalAlignment="Center">PLC-3</TextBlock>
-                    <Ellipse Width="30" Height="30" Fill="{Binding Path=PLC_Status[2],Converter={StaticResource converter}}"></Ellipse>
-                    <Button Name="btnInitPlc" Content="初始化PLC" Margin="5 0" Width="75" Command="{Binding Path=InitPlcCmd}"/>
-                    <Button Name="btnInitMQ" Content="初始化MQ" Margin="5 0" Width="75" Command="{Binding Path=InitMQCmd}"></Button>
-                    <Button Name="btnInitScanner" Content="初始化扫码枪" Margin="5 0" Width="75" Command="{Binding Path=InitScannerCmd}"></Button>
+                    <TextBlock VerticalAlignment="Center"><Run Text="PLC连接状态："/></TextBlock>
+                    <TextBlock VerticalAlignment="Center"><Run Text="组装"/></TextBlock>
+                    <Ellipse Width="30" Height="30" Fill="{Binding PLC_Status[0], Converter={StaticResource converter}}"/>
+                    <TextBlock VerticalAlignment="Center"><Run Text="校表"/></TextBlock>
+                    <Ellipse Width="30" Height="30" Fill="{Binding PLC_Status[1], Converter={StaticResource converter}}"/>
+                    <TextBlock VerticalAlignment="Center"><Run Text="包装"/></TextBlock>
+                    <Ellipse Width="30" Height="30" Fill="{Binding PLC_Status[2], Converter={StaticResource converter}}"/>
+                    <Button x:Name="btnInitPlc" Content="初始化PLC" Margin="5 0" Width="75" Command="{Binding InitPlcCmd}"/>
+                    <Button x:Name="btnInitMQ" Content="初始化MQ" Margin="5 0" Width="75" Command="{Binding InitMQCmd}"/>
+                    <Button x:Name="btnInitScanner" Content="初始化扫码枪" Margin="5 0" Width="75" Command="{Binding InitScannerCmd}"/>
                 </StackPanel>
             </TabItem>
             <TabItem Header="测试" Width="60">
@@ -50,8 +50,9 @@
 
                         <Border Margin="10 0 0 0" BorderThickness="1" BorderBrush="Black">
                             <StackPanel Orientation="Horizontal">
-                                <TextBlock >IP：</TextBlock>
-                                <TextBox Name="txtScannerIp" Width="150">192.168.100.100</TextBox>
+                                <TextBlock >扫码枪：</TextBlock>
+                                <ComboBox Name="combScanner" Width="200" DisplayMemberPath="NAME" SelectedValuePath="IP" ItemsSource="{Binding Path=Source.ScanDevices}" IsSynchronizedWithCurrentItem="True">
+                                </ComboBox>
                                 <Button x:Name="btnScanTest" Content="扫码触发测试" Margin="10 0 0 0"  Width="85" Click="BtnScanTest_Click"/>
                             </StackPanel>
                         </Border>

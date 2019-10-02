@@ -80,7 +80,7 @@ namespace YQPLCMgt.Helper
                 byte[] bytStart, bytStop;
                 bytStart = new byte[] { 0x16, 0x54, 0x0d };//启动
                 Send(bytStart);
-                Thread.Sleep(500);//扫描500ms
+                Thread.Sleep(1500);//扫描时间1500ms  不可减少，放置119扫码枪
                 bytStop = new byte[] { 0x16, 0x55, 0x0d };//停止
                 Send(bytStop);
             });

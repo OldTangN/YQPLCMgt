@@ -4,10 +4,13 @@ using RabbitMQ;
 using RabbitMQ.YQMsg;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 using YQPLCMgt.Helper;
@@ -24,6 +27,10 @@ namespace YQPLCMgt.UI.ViewModel
         public bool InitCompleted { get => _InitCompleted; set => Set(ref _InitCompleted, value); }
 
         public bool[] PLC_Status { get => _PLC_Status; set => Set(ref _PLC_Status, value); }
+
+        private ICollectionView _LstPLCs;
+        public ICollectionView LstPLCs => _LstPLCs;
+
         #endregion
 
         #region private field
@@ -53,10 +60,11 @@ namespace YQPLCMgt.UI.ViewModel
         public MainViewModel()
         {
             Source = new DataSource();
+            _LstPLCs = CollectionViewSource.GetDefaultView(new List<string>()
+            {
+                "全部","192.168.0.10", "192.168.0.20", "192.168.0.30"
+            });
         }
-
-        private int _CurrPort = 10;
-        public int CurrPort { get => _CurrPort; set => Set(ref _CurrPort, value); }
 
         #region 初始化
         public async void Init()
@@ -135,10 +143,21 @@ namespace YQPLCMgt.UI.ViewModel
             return Task.Run(() =>
             {
                 ShowMsg("初始化PLC...");
-                string[] plc_ips = new string[]
+                string[] plc_ips;
+                if (LstPLCs.CurrentItem.ToString() == "全部")
                 {
-               "192.168.0."+ CurrPort//"192.168.0.10","192.168.0.20","192.168.0.30"
-                };
+                    plc_ips = new string[]
+                    {
+                        "192.168.0.10", "192.168.0.20", "192.168.0.30"
+                    };
+                }
+                else
+                {
+                    plc_ips = new string[]
+                    {
+                        LstPLCs.CurrentItem.ToString()
+                    };
+                }
                 IsAllPLCConnected = true;
                 plcs?.ToList().ForEach(p => p?.DisConnect());
                 plcs = new PLCHelper[plc_ips.Length];
@@ -277,7 +296,7 @@ namespace YQPLCMgt.UI.ViewModel
             {
                 if (_StartCmd == null)
                 {
-                    _StartCmd = new RelayCommand(Start, CanStart);
+                    _StartCmd = new RelayCommand(Start);
                 }
                 return _StartCmd;
             }
@@ -287,15 +306,16 @@ namespace YQPLCMgt.UI.ViewModel
         {
             cancelToken = new CancellationTokenSource();
             Task.Run(new Action(MonitorDevice), cancelToken.Token);
-            //Task.Run(new Action(MonitorStopDevice), cancelToken.Token);
-            //Task.Run(new Action(MonitorMachine), cancelToken.Token);
         }
 
         private bool CanStart()
         {
             return InitCompleted && IsAllPLCConnected;
         }
-
+        private int chutiao_count = 0;
+        private int fujiao_count = 0;
+        private DateTime lastChutiaoTime = DateTime.Now;
+        private DateTime lastFujiaoTime = DateTime.Now;
         private void MonitorDevice()
         {
             int start = 100;
@@ -325,11 +345,14 @@ namespace YQPLCMgt.UI.ViewModel
                                 {
                                     string dmAddr = "DM" + (start + i);
                                     getValues[i] = Convert.ToInt32(getStrs[i]);
+                                    string pass_cmd = "2";//TODO:放行指令
+
                                     #region 上报状态至MQ服务器
                                     //获取专机
                                     var machine = _Source.MachineDevices.FirstOrDefault(p => p.DMAddr_Status == dmAddr && p.PLCIP == plc.IP);
                                     if (machine != null)//专机状态PLC
                                     {
+                                        
                                         PLCMsg plcMsg = new PLCMsg();
                                         plcMsg.DEVICE_TYPE = machine.DEVICE_TYPE;
                                         plcMsg.NO = machine.NO;
@@ -361,6 +384,17 @@ namespace YQPLCMgt.UI.ViewModel
                                         }
                                         #endregion
 
+                                        if ("E00214" == machine.NO)//TODO:初调前挡停自动放行命令2、3
+                                        {
+                                            pass_cmd = (chutiao_count / 8 % 2 + 2).ToString();
+                                            chutiao_count++;
+                                        }
+                                        if ("E00215" == machine.NO)//TODO:复校前挡停自动放行命令2、3、4、5
+                                        {
+                                            pass_cmd = (fujiao_count / 8 % 4 + 2).ToString();
+                                            fujiao_count++;
+                                        }
+
                                         PLCMsg plcMsg = new PLCMsg();
                                         plcMsg.DEVICE_TYPE = stop.DEVICE_TYPE;
                                         plcMsg.NO = stop.NO;
@@ -375,7 +409,8 @@ namespace YQPLCMgt.UI.ViewModel
                                     //TODO:测试代码，直接发放行命令
                                     if (getValues[i] == 1)
                                     {
-                                        var resp = plc.Send($"WR {dmAddr}.U 2\r");
+
+                                        var resp = plc.Send($"WR {dmAddr}.U {pass_cmd}\r");
                                         if (resp.HasError)
                                         {
                                             ShowMsg(resp.ErrorMsg);
@@ -405,7 +440,7 @@ namespace YQPLCMgt.UI.ViewModel
             {
                 if (_StopCmd == null)
                 {
-                    _StopCmd = new RelayCommand(Stop, () => InitCompleted);
+                    _StopCmd = new RelayCommand(Stop);
                 }
                 return _StopCmd;
             }
