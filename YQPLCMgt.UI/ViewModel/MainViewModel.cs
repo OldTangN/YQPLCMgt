@@ -16,7 +16,6 @@ namespace YQPLCMgt.UI.ViewModel
 {
     public class MainViewModel : ObservableObject, IDisposable
     {
-
         #region public property
         public DataSource Source { get => _Source; set => _Source = value; }
         public bool PLC1_Status { get => _PLC1_Status; set => Set(ref _PLC1_Status, value); }
@@ -56,12 +55,15 @@ namespace YQPLCMgt.UI.ViewModel
             Source = new DataSource();
         }
 
+        private int _CurrPort = 10;
+        public int CurrPort { get => _CurrPort; set => Set(ref _CurrPort, value); }
+
         #region 初始化
-        public void Init()
+        public async void Init()
         {
-            InitMQ();
-            InitPLC();
-            //InitScan();
+            await InitMQ();
+            await InitPLC();
+            await InitScan();
             InitCompleted = true;
         }
 
@@ -69,87 +71,88 @@ namespace YQPLCMgt.UI.ViewModel
         /// 初始化MQ Client
         /// <para>MQ需要手动关闭，否则后台线程不退出</para>
         /// </summary>
-        public void InitMQ()
+        public Task InitMQ()
         {
-            ShowMsg("初始化MQ...");
-            mqClient?.Close();
-            try
+            return Task.Run(() =>
             {
-                mqClient = new ClientMQ();
-                mqClient.singleArrivalEvent += MqClient_singleArrivalEvent;
-                mqClient.ReceiveMessage();
-                ShowMsg("初始化MQ完毕！");
-            }
-            catch (Exception ex)
-            {
-                MyLog.WriteLog("初始化MQ失败！", ex);
-                ShowMsg("初始化MQ失败！");
-            }
+                ShowMsg("初始化MQ...");
+                mqClient?.Close();
+                try
+                {
+                    mqClient = new ClientMQ();
+                    mqClient.singleArrivalEvent += MqClient_singleArrivalEvent;
+                    mqClient.ReceiveMessage();
+                    ShowMsg("初始化MQ完毕！");
+                }
+                catch (Exception ex)
+                {
+                    MyLog.WriteLog("初始化MQ失败！", ex);
+                    ShowMsg("初始化MQ失败！");
+                }
+            });
         }
 
         /// <summary>
         /// 初始化扫码枪
         /// </summary>
-        private void InitScan()
+        private Task InitScan()
         {
-            ShowMsg("初始化扫码枪...");
-            if (scanHelpers != null)
+            return Task.Run(() =>
             {
-                scanHelpers.ForEach(p => p.DisConnect());
-            }
-            scanHelpers = new List<ScannerHelper>();
-            string errComNames = "";
-            foreach (var item in _Source.ScanDevices)
-            {
-                ScannerHelper scanHelper;
-                scanHelper = new SocketScannerHelper(item);
-                //if (item.IOType == ScannerIO.Socket)
-                //{
-                //    scanHelper = new SocketScannerHelper(item);
-                //}
-                //else
-                //{
-                //    scanHelper = new SerialScannerHelper(item);
-                //}
-                scanHelper.OnScanned += ScannedCallback;
-                scanHelper.OnError += ShowMsg;
-                if (!scanHelper.Connect())
+                ShowMsg("初始化扫码枪...");
+                if (scanHelpers != null)
                 {
-                    errComNames += item.IP + ",";
+                    scanHelpers.ForEach(p => p.DisConnect());
                 }
-                scanHelpers.Add(scanHelper);
-            }
+                scanHelpers = new List<ScannerHelper>();
+                string errComNames = "";
+                foreach (var item in _Source.ScanDevices)
+                {
+                    ScannerHelper scanHelper;
+                    scanHelper = new SocketScannerHelper(item);
+                    scanHelper.OnScanned += ScannedCallback;
+                    scanHelper.OnError += ShowMsg;
+                    if (!scanHelper.Connect())
+                    {
+                        errComNames += item.IP + ",";
+                    }
+                    scanHelpers.Add(scanHelper);
+                }
 
-            if (!string.IsNullOrEmpty(errComNames))
-            {
-                errComNames = errComNames.Remove(errComNames.Length - 1, 1);
-                ShowMsg("条码枪串口初始化失败——" + errComNames);
-            }
+                if (!string.IsNullOrEmpty(errComNames))
+                {
+                    errComNames = errComNames.Remove(errComNames.Length - 1, 1);
+                    ShowMsg("条码枪串口初始化失败——" + errComNames);
+                }
+            });
         }
         private bool IsAllPLCConnected = true;
         /// <summary>
         /// 初始化PLC
         /// </summary>
-        private void InitPLC()
+        private Task InitPLC()
         {
-            ShowMsg("初始化PLC...");
-            string[] plc_ips = new string[]
+            return Task.Run(() =>
             {
-                "192.168.0.10"//,"192.168.0.20",//"192.168.0.30"
-            };
-            IsAllPLCConnected = true;
-            plcs?.ToList().ForEach(p => p.DisConnect());
-            plcs = new PLCHelper[plc_ips.Length];
-            PLC_Status = new bool[plc_ips.Length];
-            for (int i = 0; i < plcs.Length; i++)
-            {
-                plcs[i] = new PLCHelper(plc_ips[i], 8501, true);
-                plcs[i].OnShowMsg += ShowMsg;
-                PLC_Status[i] = plcs[i].Connect();
-                IsAllPLCConnected &= PLC_Status[i];
-            }
-            RaisePropertyChanged("PLC_Status");
-            ShowMsg("初始化PLC完毕！");
+                ShowMsg("初始化PLC...");
+                string[] plc_ips = new string[]
+                {
+               "192.168.0."+ CurrPort//"192.168.0.10","192.168.0.20","192.168.0.30"
+                };
+                IsAllPLCConnected = true;
+                plcs?.ToList().ForEach(p => p?.DisConnect());
+                plcs = new PLCHelper[plc_ips.Length];
+                PLC_Status = new bool[plc_ips.Length];
+                for (int i = 0; i < plcs.Length; i++)
+                {
+                    plcs[i] = new PLCHelper(plc_ips[i], 8501, true);
+                    plcs[i].OnShowMsg += ShowMsg;
+                    PLC_Status[i] = plcs[i].Connect();
+                    IsAllPLCConnected &= PLC_Status[i];
+                }
+                RaisePropertyChanged("PLC_Status");
+                ShowMsg("初始化PLC完毕！");
+            });
         }
         #endregion
 
@@ -172,7 +175,7 @@ namespace YQPLCMgt.UI.ViewModel
                 try
                 {
                     BarcodeMsg msg = new BarcodeMsg(scan.NO);
-                    msg.BAR_CODE = barcode;
+                    msg.BAR_CODE = barcode.Split(',')[0];//TODO: 条码,库编号 识别6表位托盘
                     string strJson = JsonConvert.SerializeObject(msg);
                     mqClient?.SentMessage(strJson);
                 }
@@ -412,7 +415,26 @@ namespace YQPLCMgt.UI.ViewModel
         {
             cancelToken?.Cancel();
             cancelToken = null;
+            if (PLC_Status != null && PLC_Status.Length > 0)
+            {
+                for (int i = 0; i < PLC_Status.Length; i++)
+                {
+                    PLC_Status[i] = false;
+                }
+            }
         }
+
+        #endregion
+
+        #region InitPlcCmd
+        private RelayCommand _InitPlcCmd;
+        public RelayCommand InitPlcCmd => _InitPlcCmd ?? (_InitPlcCmd = new RelayCommand(() => { InitPLC(); }));
+
+        private RelayCommand _InitMQCmd;
+        public RelayCommand InitMQCmd => _InitMQCmd ?? (_InitMQCmd = new RelayCommand(() => { InitMQ(); }));
+
+        private RelayCommand _InitScannerCmd;
+        public RelayCommand InitScannerCmd => _InitScannerCmd ?? (_InitScannerCmd = new RelayCommand(() => { InitScan(); }));
         #endregion
 
         #endregion
@@ -420,10 +442,7 @@ namespace YQPLCMgt.UI.ViewModel
         public void Dispose()
         {
             mqClient?.Close();
-            foreach (var plc in plcs)
-            {
-                plc?.DisConnect();
-            }
+            plcs?.ToList().ForEach(plc => plc?.DisConnect());
         }
 
         private void ShowMsg(string msg)

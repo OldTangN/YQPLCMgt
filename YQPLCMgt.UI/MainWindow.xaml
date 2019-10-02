@@ -18,8 +18,9 @@
         <TabControl Grid.Row="0" BorderBrush="Black" BorderThickness="0 1 0 1" Height="100" HorizontalAlignment="Stretch" VerticalAlignment="Top">
             <TabItem Header="运行" Width="60">
                 <StackPanel Grid.Row="1" Orientation="Horizontal" VerticalAlignment="Center">
-                    <Button Command="{Binding Path=StartCmd}" Content="监听" HorizontalAlignment="Left" Margin="30 0 0 0" Width="75"/>
-                    <Button Command="{Binding Path=StopCmd}" Content="停止" HorizontalAlignment="Left" Margin="30 0 30 0" Width="75"></Button>
+                    <Button Command="{Binding Path=StartCmd}" Content="监听" HorizontalAlignment="Left" Margin="10 0" Width="75"/>
+                    <TextBox Name="txtPortTmp" Height="23" TextWrapping="Wrap" Text="{Binding Path=CurrPort,UpdateSourceTrigger=PropertyChanged}" Width="40"/>
+                    <Button Command="{Binding Path=StopCmd}" Content="停止" HorizontalAlignment="Left" Margin="10 0" Width="75"></Button>
 
                     <TextBlock VerticalAlignment="Center">PLC连接状态：</TextBlock>
                     <TextBlock VerticalAlignment="Center">PLC-1</TextBlock>
@@ -28,7 +29,9 @@
                     <Ellipse Width="30" Height="30" Fill="{Binding Path=PLC_Status[1],Converter={StaticResource converter}}"></Ellipse>
                     <TextBlock VerticalAlignment="Center">PLC-3</TextBlock>
                     <Ellipse Width="30" Height="30" Fill="{Binding Path=PLC_Status[2],Converter={StaticResource converter}}"></Ellipse>
-                    <Button Content="Button" Width="75" Click="Button_Click"/>
+                    <Button Name="btnInitPlc" Content="初始化PLC" Margin="5 0" Width="75" Command="{Binding Path=InitPlcCmd}"/>
+                    <Button Name="btnInitMQ" Content="初始化MQ" Margin="5 0" Width="75" Command="{Binding Path=InitMQCmd}"></Button>
+                    <Button Name="btnInitScanner" Content="初始化扫码枪" Margin="5 0" Width="75" Command="{Binding Path=InitScannerCmd}"></Button>
                 </StackPanel>
             </TabItem>
             <TabItem Header="测试" Width="60">
