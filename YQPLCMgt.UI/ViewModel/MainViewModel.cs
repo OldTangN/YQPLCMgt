@@ -345,14 +345,16 @@ namespace YQPLCMgt.UI.ViewModel
                                 {
                                     string dmAddr = "DM" + (start + i);
                                     getValues[i] = Convert.ToInt32(getStrs[i]);
+#if AUTO_PASS
                                     string pass_cmd = "2";//TODO:放行指令
+#endif
 
                                     #region 上报状态至MQ服务器
                                     //获取专机
                                     var machine = _Source.MachineDevices.FirstOrDefault(p => p.DMAddr_Status == dmAddr && p.PLCIP == plc.IP);
                                     if (machine != null)//专机状态PLC
                                     {
-                                        
+
                                         PLCMsg plcMsg = new PLCMsg();
                                         plcMsg.DEVICE_TYPE = machine.DEVICE_TYPE;
                                         plcMsg.NO = machine.NO;
@@ -369,6 +371,18 @@ namespace YQPLCMgt.UI.ViewModel
                                         string strJson = JsonConvert.SerializeObject(plcMsg);
                                         mqClient?.SentMessage(strJson);
                                         Thread.Sleep(50);
+#if AUTO_PASS
+                                        //TODO:多表位发送启动动作命令
+                                        if (machine.Max_Pallet_Count > 1 && machine.Max_Pallet_Count == plcMsg.PALLET_COUNT)
+                                        {
+                                            var resp = plc.Send($"WR {dmAddr}.U 3\r");
+                                            Thread.Sleep(1000);
+                                            if (resp.HasError)
+                                            {
+                                                ShowMsg(resp.ErrorMsg);
+                                            }
+                                        }
+#endif
                                     }
 
                                     //获取挡停
@@ -384,16 +398,18 @@ namespace YQPLCMgt.UI.ViewModel
                                         }
                                         #endregion
 
-                                        if ("E00214" == machine.NO)//TODO:初调前挡停自动放行命令2、3
+#if AUTO_PASS
+                                        if ("E00214" == stop.NO)//TODO:初调前挡停自动放行命令2、3
                                         {
                                             pass_cmd = (chutiao_count / 8 % 2 + 2).ToString();
                                             chutiao_count++;
                                         }
-                                        if ("E00215" == machine.NO)//TODO:复校前挡停自动放行命令2、3、4、5
+                                        if ("E00215" == stop.NO)//TODO:复校前挡停自动放行命令2、3、4、5
                                         {
                                             pass_cmd = (fujiao_count / 8 % 4 + 2).ToString();
                                             fujiao_count++;
                                         }
+#endif
 
                                         PLCMsg plcMsg = new PLCMsg();
                                         plcMsg.DEVICE_TYPE = stop.DEVICE_TYPE;
@@ -405,17 +421,18 @@ namespace YQPLCMgt.UI.ViewModel
                                     }
 
                                     #endregion
-
+#if AUTO_PASS
                                     //TODO:测试代码，直接发放行命令
                                     if (getValues[i] == 1)
                                     {
-
                                         var resp = plc.Send($"WR {dmAddr}.U {pass_cmd}\r");
+                                        Thread.Sleep(1000);
                                         if (resp.HasError)
                                         {
                                             ShowMsg(resp.ErrorMsg);
                                         }
                                     }
+#endif
                                 }
                             }
                         }
@@ -426,7 +443,7 @@ namespace YQPLCMgt.UI.ViewModel
                     MyLog.WriteLog("MonitorDevice异常！", ex);
                     ShowMsg("MonitorDevice异常！" + ex.Message + "\r" + ex.StackTrace);
                 }
-                Thread.Sleep(2000);
+                Thread.Sleep(1500);
             }
         }
 

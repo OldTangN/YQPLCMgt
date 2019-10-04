@@ -9,11 +9,12 @@ namespace YQPLCMgt.Helper
 
     public class MachineDevice : DeviceBase
     {
-        public MachineDevice(string no, string name, string dmAddrPallet, string dmAddrStatus, string plc_ip) : base(no, name)
+        public MachineDevice(string no, string name, string dmAddrPallet, string dmAddrStatus, string plc_ip,int max_pallet_count) : base(no, name)
         {
             this.DMAddr_Pallet = dmAddrPallet;
             this.DMAddr_Status = dmAddrStatus;
             this.PLCIP = plc_ip;
+            this.Max_Pallet_Count = max_pallet_count;
         }
 
         /// <summary>
@@ -27,6 +28,8 @@ namespace YQPLCMgt.Helper
         public string DMAddr_Status { get; set; }
 
         public string PLCIP { get; set; }
+
+        public int Max_Pallet_Count { get; set; }
     }
 
 }

@@ -117,7 +117,7 @@ namespace YQPLCMgt.UI
             }
             foreach (var m in lstMachine)
             {
-                MachineDevice machineDevice = new MachineDevice(m[1], m[2], m[3], m[4], m[5]);
+                MachineDevice machineDevice = new MachineDevice(m[1], m[2], m[3], m[4], m[5],Convert.ToInt32(m[6]));
                 MachineDevices.Add(machineDevice);
             }
         }
