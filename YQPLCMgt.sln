@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YQPLCMgt.UI", "YQPLCMgt.UI\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YQPLCMgt.Helper", "YQPLCMgt.Helper\YQPLCMgt.Helper.csproj", "{36E93306-8A31-4B71-B091-86C4D32DD676}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YQServer", "YQServer\YQServer.csproj", "{535B0973-338F-4EA0-8CD5-3369C753166E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{36E93306-8A31-4B71-B091-86C4D32DD676}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{36E93306-8A31-4B71-B091-86C4D32DD676}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{36E93306-8A31-4B71-B091-86C4D32DD676}.Release|Any CPU.Build.0 = Release|Any CPU
+		{535B0973-338F-4EA0-8CD5-3369C753166E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{535B0973-338F-4EA0-8CD5-3369C753166E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{535B0973-338F-4EA0-8CD5-3369C753166E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{535B0973-338F-4EA0-8CD5-3369C753166E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

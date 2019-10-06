@@ -83,7 +83,12 @@ namespace YQPLCMgt.Helper
                 Thread.Sleep(1500);//扫描时间1500ms  不可减少，放置119扫码枪
                 bytStop = new byte[] { 0x16, 0x55, 0x0d };//停止
                 Send(bytStop);
+                Thread.Sleep(500);
+                string data = Receive();
+                RaiseScanned(Scanner, data);
             });
         }
+
+        protected abstract string Receive();
     }
 }

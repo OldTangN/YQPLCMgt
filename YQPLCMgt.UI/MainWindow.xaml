@@ -71,7 +71,9 @@
                         <RadioButton  Content="写入" GroupName="rw" VerticalAlignment="Center"></RadioButton>
                         <TextBlock Margin="20 0 0 0" VerticalAlignment="Center">值：</TextBlock>
                         <TextBox x:Name="txtRWValue" Width="60" VerticalAlignment="Center">2</TextBox>
-                        
+                        <Button x:Name="btnRobot2" Click="BtnRobot2_Click" Content="2号机器人循环" Width="85" Margin="10 0"/>
+                        <Button x:Name="btnRobot3" Click="BtnRobot3_Click" Margin="10 0" Content="3号机器人循环" Width="85"/>
+
                     </StackPanel>
                 </Grid>
             </TabItem>

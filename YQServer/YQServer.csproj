@@ -4,10 +4,10 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{1A8BDA19-8F35-4A2F-AB77-7FB8A06D267D}</ProjectGuid>
+    <ProjectGuid>{535B0973-338F-4EA0-8CD5-3369C753166E}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <RootNamespace>YQPLCMgt.UI</RootNamespace>
-    <AssemblyName>YQPLCMgt.UI</AssemblyName>
+    <RootNamespace>YQServer</RootNamespace>
+    <AssemblyName>YQServer</AssemblyName>
     <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -22,7 +22,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;AUTO_PASS_NOT</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;PASS</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
@@ -36,32 +36,24 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="CommonServiceLocator, Version=2.0.2.0, Culture=neutral, PublicKeyToken=489b6accfaf20ef0, processorArchitecture=MSIL">
-      <HintPath>..\packages\CommonServiceLocator.2.0.2\lib\net45\CommonServiceLocator.dll</HintPath>
-    </Reference>
-    <Reference Include="log4net, Version=2.0.8.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="log4net">
       <HintPath>..\lib\log4net.dll</HintPath>
     </Reference>
-    <Reference Include="ManagedLXEAPI">
-      <HintPath>..\lib\ManagedLXEAPI.dll</HintPath>
-    </Reference>
-    <Reference Include="MyLogLib, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="MyLogLib">
       <HintPath>..\lib\MyLogLib.dll</HintPath>
     </Reference>
-    <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Newtonsoft.Json.12.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
-    <Reference Include="RabbitMQ, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="RabbitMQ">
       <HintPath>..\lib\RabbitMQ.dll</HintPath>
+    </Reference>
+    <Reference Include="RabbitMQ.Client">
+      <HintPath>..\lib\RabbitMQ.Client.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
-    <Reference Include="System.Windows.Interactivity, Version=4.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\MvvmLightLibs.5.4.1.1\lib\net45\System.Windows.Interactivity.dll</HintPath>
-    </Reference>
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -80,12 +72,6 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Model\Barcode.cs" />
-    <Compile Include="Model\TestMsg.cs" />
-    <Compile Include="ViewModel\BrushConvert.cs" />
-    <Compile Include="ViewModel\MainViewModel.cs" />
-    <Compile Include="ViewModel\ObservableObject.cs" />
-    <Compile Include="ViewModel\RelayCommand.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -94,7 +80,66 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Data\DataSource.cs" />
+    <Compile Include="Device\dangting\E00224.cs" />
+    <Compile Include="Device\dangting\E00223.cs" />
+    <Compile Include="Device\dangting\E00222.cs" />
+    <Compile Include="Device\dangting\E00221.cs" />
+    <Compile Include="Device\dangting\E00220.cs" />
+    <Compile Include="Device\dangting\E00219.cs" />
+    <Compile Include="Device\dangting\E00218.cs" />
+    <Compile Include="Device\dangting\E00217.cs" />
+    <Compile Include="Device\dangting\E00216.cs" />
+    <Compile Include="Device\dangting\E00215.cs" />
+    <Compile Include="Device\dangting\E00214.cs" />
+    <Compile Include="Device\dangting\E00213.cs" />
+    <Compile Include="Device\dangting\E00212.cs" />
+    <Compile Include="Device\dangting\E00211.cs" />
+    <Compile Include="Device\dangting\E00210.cs" />
+    <Compile Include="Device\dangting\E00209.cs" />
+    <Compile Include="Device\dangting\E00208.cs" />
+    <Compile Include="Device\dangting\E00207.cs" />
+    <Compile Include="Device\dangting\E00206.cs" />
+    <Compile Include="Device\dangting\E00205.cs" />
+    <Compile Include="Device\dangting\E00204.cs" />
+    <Compile Include="Device\dangting\E00203.cs" />
+    <Compile Include="Device\dangting\E00202.cs" />
+    <Compile Include="Device\DeviceBase.cs" />
+    <Compile Include="Device\baozhuang\E02401.cs" />
+    <Compile Include="Device\baozhuang\E02501.cs" />
+    <Compile Include="Device\baozhuang\E02601.cs" />
+    <Compile Include="Device\baozhuang\E02701.cs" />
+    <Compile Include="Device\baozhuang\E02801.cs" />
+    <Compile Include="Device\baozhuang\E03001.cs" />
+    <Compile Include="Device\baozhuang\E03101.cs" />
+    <Compile Include="Device\baozhuang\E03202.cs" />
+    <Compile Include="Device\dangting\E00201.cs" />
+    <Compile Include="Device\jiaobiao\E02001.cs" />
+    <Compile Include="Device\jiaobiao\E02101.cs" />
+    <Compile Include="Device\jiaobiao\E02102.cs" />
+    <Compile Include="Device\jiaobiao\E02201.cs" />
+    <Compile Include="Device\jiaobiao\E02202.cs" />
+    <Compile Include="Device\jiaobiao\E02203.cs" />
+    <Compile Include="Device\jiaobiao\E02204.cs" />
+    <Compile Include="Device\jiaobiao\E02301.cs" />
+    <Compile Include="Device\zuzhuang\E0100101.cs" />
+    <Compile Include="Device\zuzhuang\E0100102.cs" />
+    <Compile Include="Device\zuzhuang\E0100103.cs" />
+    <Compile Include="Device\zuzhuang\E0100201.cs" />
+    <Compile Include="Device\zuzhuang\E0100202.cs" />
+    <Compile Include="Device\zuzhuang\E0100203.cs" />
+    <Compile Include="Device\zuzhuang\E01101.cs" />
+    <Compile Include="Device\zuzhuang\E01201.cs" />
+    <Compile Include="Device\zuzhuang\E01301.cs" />
+    <Compile Include="Device\zuzhuang\E01401.cs" />
+    <Compile Include="Device\zuzhuang\E01501.cs" />
+    <Compile Include="Device\zuzhuang\E01601.cs" />
+    <Compile Include="Device\zuzhuang\E01602.cs" />
+    <Compile Include="Device\zuzhuang\E01701.cs" />
+    <Compile Include="Device\zuzhuang\E01801.cs" />
+    <Compile Include="Device\zuzhuang\E01901.cs" />
+    <Compile Include="Device\zuzhuang\E03201.cs" />
+    <Compile Include="Device\IDevice.cs" />
+    <Compile Include="GlobalData.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -121,7 +166,6 @@
     <None Include="MQSet.ini">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -129,30 +173,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\YQPLCMgt.Helper\YQPLCMgt.Helper.csproj">
-      <Project>{36e93306-8a31-4b71-b091-86c4d32dd676}</Project>
-      <Name>YQPLCMgt.Helper</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Data\Scan.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Data\Stop.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Data\Machine.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Images\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

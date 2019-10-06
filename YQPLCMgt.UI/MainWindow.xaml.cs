@@ -84,7 +84,7 @@ namespace YQPLCMgt.UI
         {
             rtxtMsg.Dispatcher.Invoke(() =>
             {
-                if (rtxtMsg.Document.Blocks.Count > 500)
+                if (rtxtMsg.Document.Blocks.Count > 100)
                 {
                     rtxtMsg.Document.Blocks.Clear();
                 }
@@ -127,7 +127,9 @@ namespace YQPLCMgt.UI
 
         private void BtnTest_Click(object sender, RoutedEventArgs e)
         {
-
+            //List<string> codes = new List<string> { "1", "22", "333", "444", "666666", "55555" };
+            //codes.Sort((s1, s2) => { return s2.Length - s1.Length; });
+            //return;
             TestMsg msg = new TestMsg();
             msg.DEVICE_TYPE = "E101";
             msg.NO = "1";
@@ -166,15 +168,17 @@ namespace YQPLCMgt.UI
             scan = new SocketScannerHelper(new ScanDevice("E00102", "人工PCB工位挡停前扫码枪", combScanner.SelectedValue.ToString(), 9004));
             scan.OnScanned += (dev, data) =>
             {
+                AppendText(idx++ + " -- " + data);
                 //格式条码+\r
-                string[] codes = data.Split('\r');
+                List<string> codes = data.Split('\r').ToList();
+                codes.Sort((s1, s2) => { return s2.Length - s1.Length; });//托盘码最后传
                 foreach (var barcode in codes)
                 {
                     if (string.IsNullOrEmpty(barcode) || barcode.Length < 4)//TODO:条码长度过滤非法数据
                     {
                         continue;
                     }
-                    AppendText(idx++ + " -- " + barcode);
+                    AppendText(" ---- " + barcode);
                 }
             };
             scan.OnError += AppendText;
@@ -218,6 +222,100 @@ namespace YQPLCMgt.UI
                     txtRWValue.Text = rlt.Text;
                 }
             }
+        }
+
+
+        private int i = 0;
+        private void BtnRobot2_Click(object sender, RoutedEventArgs e)
+        {
+            if (plc == null || !plc.IsConnected)
+            {
+                return;
+            }
+            btnRobot2.IsEnabled = false;
+            Task.Run(() =>
+            {
+                int[] flags = new int[] { 11, 12, 13, 14, 15, 16 };//17
+                string strCmd = "";
+                while (true)
+                {
+                    Thread.Sleep(1000);
+                    strCmd = $"RD DM219.U\r";
+                    var rltRead = plc.Send(strCmd);
+                    if (rltRead.HasError)
+                    {
+                        AppendText(rltRead.ErrorMsg);
+                    }
+                    else
+                    {
+                        if (Convert.ToInt32(rltRead.Text) == 4)
+                        {
+                            strCmd = $"WR DM219.U {flags[i]}\r";
+                            i++;
+                            if (i >= flags.Length)
+                            {
+                                i = 0;
+                            }
+                            var rltWrite = plc.Send(strCmd);
+                            if (rltWrite.HasError)
+                            {
+                                AppendText(rltWrite.ErrorMsg);
+                            }
+                        }
+                        else
+                        {
+                            continue;
+                        }
+                    }
+                }
+            });
+        }
+
+        private int j = 0;
+        private void BtnRobot3_Click(object sender, RoutedEventArgs e)
+        {
+            if (plc == null || !plc.IsConnected)
+            {
+                return;
+            }
+            btnRobot3.IsEnabled = false;
+            Task.Run(() =>
+            {
+                j = 0;
+                string strCmd = "";
+                int[] flags = new int[] { 11, 12, 13, 14, 15, 16, };//21, 22, 23, 24, 25, 26
+                while (true)
+                {
+                    Thread.Sleep(1000);
+                    strCmd = $"RD DM234.U\r";
+                    var rltRead = plc.Send(strCmd);
+                    if (rltRead.HasError)
+                    {
+                        AppendText(rltRead.ErrorMsg);
+                    }
+                    else
+                    {
+                        if (Convert.ToInt32(rltRead.Text) == 4)
+                        {
+                            strCmd = $"WR DM234.U {flags[j]}\r";
+                            j++;
+                            if (j >= flags.Length)
+                            {
+                                j = 0;
+                            }
+                            var rltWrite = plc.Send(strCmd);
+                            if (rltWrite.HasError)
+                            {
+                                AppendText(rltWrite.ErrorMsg);
+                            }
+                        }
+                        else
+                        {
+                            continue;
+                        }
+                    }
+                }
+            });
         }
     }
 }

@@ -184,7 +184,8 @@ namespace YQPLCMgt.UI.ViewModel
         {
             ShowMsg("扫码:" + scan.IP + " -- " + data);
             //格式条码+\r
-            string[] codes = data.Split('\r');
+            List<string> codes = data.Split('\r').ToList();
+            codes.Sort((s1, s2) => { return s2.Length - s1.Length; });//托盘码最后传
             foreach (var barcode in codes)
             {
                 if (string.IsNullOrEmpty(barcode) || barcode.Length < 4)//TODO:条码长度过滤非法数据
@@ -229,45 +230,44 @@ namespace YQPLCMgt.UI.ViewModel
 
             if (msg.MESSAGE_TYPE == "control")
             {
-                if (msg is ControlMsg ctlMsg)
+                var ctlMsg = JsonConvert.DeserializeObject<ControlMsg>(data);
+                var stop = _Source.StopDevices.FirstOrDefault(p => p.NO == ctlMsg.NO);
+                var machine = _Source.MachineDevices.FirstOrDefault(p => p.NO == ctlMsg.NO);
+                if (stop != null)
                 {
-                    var stop = _Source.StopDevices.FirstOrDefault(p => p.NO == ctlMsg.NO);
-                    var machine = _Source.MachineDevices.FirstOrDefault(p => p.NO == ctlMsg.NO);
-                    if (stop != null)
+                    var plc = plcs.FirstOrDefault(p => p.IP == stop.PLCIP);
+                    var resp = plc.SetOnePoint(stop.DMAddr_Status, ctlMsg.COMMAND_ID);
+                    if (!resp.HasError)
                     {
-                        var plc = plcs.FirstOrDefault(p => p.IP == stop.PLCIP);
-                        var resp = plc.SetOnePoint(stop.DMAddr_Status, ctlMsg.COMMAND_ID);
-                        if (!resp.HasError)
-                        {
-                            ResponseServer(stop.DEVICE_TYPE, stop.NO, ctlMsg.COMMAND_ID.ToString());
-                        }
-                        else
-                        {
-                            ShowMsg(resp.ErrorMsg);
-                        }
+                        ResponseServer(stop.DEVICE_TYPE, stop.NO, ctlMsg.COMMAND_ID.ToString());
                     }
-                    if (machine != null)
+                    else
                     {
-                        var plc = plcs.FirstOrDefault(p => p.IP == machine.PLCIP);
-                        var resp = plc.SetOnePoint(machine.DMAddr_Status, ctlMsg.COMMAND_ID);
-                        if (!resp.HasError)
-                        {
-                            ResponseServer(machine.DEVICE_TYPE, machine.NO, ctlMsg.COMMAND_ID.ToString());
-                        }
-                        else
-                        {
-                            ShowMsg(resp.ErrorMsg);
-                        }
+                        ShowMsg(resp.ErrorMsg);
                     }
                 }
+                if (machine != null)
+                {
+                    var plc = plcs.FirstOrDefault(p => p.IP == machine.PLCIP);
+                    var resp = plc.SetOnePoint(machine.DMAddr_Status, ctlMsg.COMMAND_ID);
+                    if (!resp.HasError)
+                    {
+                        ResponseServer(machine.DEVICE_TYPE, machine.NO, ctlMsg.COMMAND_ID.ToString());
+                    }
+                    else
+                    {
+                        ShowMsg(resp.ErrorMsg);
+                    }
+                }
+
             }
             else if (msg.MESSAGE_TYPE == "task")
             {
-
+                var tskMsg = JsonConvert.DeserializeObject<TaskMsg>(data);
             }
             else if (msg.MESSAGE_TYPE == "data")
             {
-
+                var dataMsg = JsonConvert.DeserializeObject<DataMsg>(data);
             }
             else
             {
@@ -426,7 +426,14 @@ namespace YQPLCMgt.UI.ViewModel
                                     if (getValues[i] == 1)
                                     {
                                         var resp = plc.Send($"WR {dmAddr}.U {pass_cmd}\r");
-                                        Thread.Sleep(1000);
+                                        if (machine?.DEVICE_TYPE == "E021" || machine.NO == "E022")
+                                        {
+                                            Thread.Sleep(10000);
+                                        }
+                                        else
+                                        {
+                                            Thread.Sleep(1000);
+                                        }
                                         if (resp.HasError)
                                         {
                                             ShowMsg(resp.ErrorMsg);
@@ -443,7 +450,7 @@ namespace YQPLCMgt.UI.ViewModel
                     MyLog.WriteLog("MonitorDevice异常！", ex);
                     ShowMsg("MonitorDevice异常！" + ex.Message + "\r" + ex.StackTrace);
                 }
-                Thread.Sleep(1500);
+                Thread.Sleep(5000);
             }
         }
 

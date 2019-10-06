@@ -17,7 +17,7 @@ namespace YQPLCMgt.Helper
         public SocketScannerHelper(ScanDevice scanSetting)
         {
             this.Scanner = scanSetting;
-         
+
         }
 
         private List<byte> Buffer = new List<byte>();
@@ -32,11 +32,11 @@ namespace YQPLCMgt.Helper
                 socket.ReceiveTimeout = 1000;//1s接收超时
                 socket.SendTimeout = 1000;//1s发送超时
                 socket.Connect(new IPEndPoint(IPAddress.Parse(Scanner.IP), Scanner.Port));
-                Task tsk = new Task(() =>
-                {
-                    Receive();
-                }, cancellation.Token);
-                tsk.Start();
+                //Task tsk = new Task(() =>
+                //{
+                //    Receive();
+                //}, cancellation.Token);
+                //tsk.Start();
                 return true;
             }
             catch (Exception ex)
@@ -48,39 +48,42 @@ namespace YQPLCMgt.Helper
             return false;
         }
 
-        private void Receive()
+        protected override string Receive()
         {
-            while (!cancellation.Token.IsCancellationRequested)
+            //while (!cancellation.Token.IsCancellationRequested)
+            //{
+            string data = "";
+            try
             {
-                try
-                {
-                    byte[] buffer = new byte[1024];
-                    int len = socket.Receive(buffer);
-                    byte[] bytArrData = buffer.Take(len).ToArray();
-                    string data = Encoding.ASCII.GetString(bytArrData);
-                    RaiseScanned(Scanner, data);
-                }
-                catch (SocketException ex)//接收超时异常不处理
-                {
-                    continue;
-                }
-                catch (Exception ex)
-                {
-                    if (!socket.Connected)
-                    {
-                        try
-                        {
-                            socket.Connect(new IPEndPoint(IPAddress.Parse(Scanner.IP), Scanner.Port));
-                        }
-                        catch
-                        {
-                        }
-                    }
-                    string errMsg = $"接收数据处理异常！{Scanner.IP}";
-                    MyLog.WriteLog(errMsg, ex);
-                    RaiseError(errMsg);
-                }
+                byte[] buffer = new byte[1024];
+                int len = socket.Receive(buffer);
+                byte[] bytArrData = buffer.Take(len).ToArray();
+                data = Encoding.ASCII.GetString(bytArrData);
+                //RaiseScanned(Scanner, data);
             }
+            catch (SocketException ex)//接收超时异常不处理
+            {
+                //continue;
+            }
+            catch (Exception ex)
+            {
+                if (!socket.Connected)
+                {
+                    try
+                    {
+                        socket.Connect(new IPEndPoint(IPAddress.Parse(Scanner.IP), Scanner.Port));
+                    }
+                    catch
+                    {
+                    }
+                }
+                string errMsg = $"{Scanner.IP}接收数据处理异常！" + ex.Message;
+                MyLog.WriteLog(errMsg, ex);
+                RaiseError(errMsg);
+            }
+            return data;
+            //}
+
         }
 
         public override void DisConnect()
