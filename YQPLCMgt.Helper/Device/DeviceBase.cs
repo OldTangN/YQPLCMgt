@@ -37,6 +37,10 @@ namespace YQPLCMgt.Helper
         /// </summary>
         public string NAME { get; set; }
 
-       
+
+        /// <summary>
+        /// 托盘数
+        /// </summary>
+        public int PALLET_COUNT { get; set; } = 0;
     }
 }

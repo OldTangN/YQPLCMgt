@@ -21,6 +21,7 @@
                     <ComboBox Height="22"  Width="120" ItemsSource="{Binding LstPLCs, UpdateSourceTrigger=PropertyChanged}" IsSynchronizedWithCurrentItem="True"/>
                     <Button Command="{Binding StartCmd}" Content="开始" HorizontalAlignment="Left" Margin="10 0" Width="75"/>
                     <Button Command="{Binding StopCmd}" Content="停止" HorizontalAlignment="Left" Margin="10 0" Width="75"/>
+                    <Button Name="btnClearBuffer" Content="清上次缓存" Click="BtnClearBuffer_Click" HorizontalAlignment="Left" Margin="10 0" Width="75"/>
                     <TextBlock VerticalAlignment="Center"><Run Text="PLC连接状态："/></TextBlock>
                     <TextBlock VerticalAlignment="Center"><Run Text="组装"/></TextBlock>
                     <Ellipse Width="30" Height="30" Fill="{Binding PLC_Status[0], Converter={StaticResource converter}}"/>
@@ -31,6 +32,7 @@
                     <Button x:Name="btnInitPlc" Content="初始化PLC" Margin="5 0" Width="75" Command="{Binding InitPlcCmd}"/>
                     <Button x:Name="btnInitMQ" Content="初始化MQ" Margin="5 0" Width="75" Command="{Binding InitMQCmd}"/>
                     <Button x:Name="btnInitScanner" Content="初始化扫码枪" Margin="5 0" Width="75" Command="{Binding InitScannerCmd}"/>
+                    <Button x:Name="btnShowInfo" Content="状态查看" Margin="5 0" Width="75" Click="BtnShowInfo_Click"/>
                 </StackPanel>
             </TabItem>
             <TabItem Header="测试" Width="60">

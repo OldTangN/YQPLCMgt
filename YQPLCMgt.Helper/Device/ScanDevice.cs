@@ -12,14 +12,7 @@ namespace YQPLCMgt.Helper
         {
             this.IP = ip;
             this.Port = port;
-            //this.IOType = ScannerIO.Socket;
         }
-
-        //public ScanDevice(string no, string name, string comName) : base(no, name)
-        //{
-        //    this.ComName = comName;
-        //    this.IOType = ScannerIO.Com;
-        //}
 
         /// <summary>
         ///IP地址 端口默认9004
@@ -28,14 +21,8 @@ namespace YQPLCMgt.Helper
 
         public int Port { get; set; }
 
-        //public string ComName { get; set; }
+        public List<string> LastScan { get; set; } = new List<string>();
 
-        //public ScannerIO IOType { get; private set; }
-    }
-
-    public enum ScannerIO
-    {
-        Socket = 1,
-        Com = 2,
+        public string Data { get; set; }
     }
 }

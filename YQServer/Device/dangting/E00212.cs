@@ -16,6 +16,7 @@ namespace YQServer.Device
         public override void DoWork(PLCMsg msg)
         {
             CurrMsg = msg;
+            return;
 #if PASS
             if (CurrMsg.STATUS == 1)//TODO:判断专机启用
             {

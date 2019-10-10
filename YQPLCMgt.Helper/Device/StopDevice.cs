@@ -25,11 +25,11 @@ namespace YQPLCMgt.Helper
         /// </summary>
         public string Scan_Device_No { get; set; }
 
-        /// <summary>
-        /// 上次状态
-        /// </summary>
-        public int LastDMAddrStatus { get; set; }
-
         public string PLCIP { get; set; }
+
+        /// <summary>
+        /// 当前状态
+        /// </summary>
+        public int STATUS { get; set; } = -1;
     }
 }

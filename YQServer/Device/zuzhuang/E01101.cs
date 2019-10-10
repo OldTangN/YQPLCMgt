@@ -19,7 +19,7 @@ namespace YQServer.Device
             if (CurrMsg.STATUS == 1)//判断专机放行
             {
                 //放行后等5秒再次放行
-                if (LAST_PASS_TIME.HasValue && (DateTime.Now - LAST_PASS_TIME.Value).Seconds < 5)
+                if (LAST_PASS_TIME.HasValue &&  (DateTime.Now - LAST_PASS_TIME.Value).Seconds < 3)
                 {
                     return;
                 }

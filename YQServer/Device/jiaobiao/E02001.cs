@@ -18,7 +18,7 @@ namespace YQServer.Device
             CurrMsg = msg;
             //判断专机满表启动插针
             if (CurrMsg.PALLET_COUNT == 2
-                && !(CurrMsg.STATUS == 1 || CurrMsg.STATUS == 3))
+                && !(CurrMsg.STATUS == 1 || CurrMsg.STATUS == 2 || CurrMsg.STATUS == 3))
             {
                 ControlMsg ctlMsg = new ControlMsg()
                 {
@@ -32,8 +32,8 @@ namespace YQServer.Device
             }
             if (CurrMsg.STATUS == 1)//判断插针就绪
             {
-                //放行后等5秒再次放行
-                if (LAST_PASS_TIME.HasValue && (DateTime.Now - LAST_PASS_TIME.Value).Seconds < 5)
+                //放行后等10秒再次放行
+                if (LAST_PASS_TIME.HasValue &&  (DateTime.Now - LAST_PASS_TIME.Value).Seconds < 10)
                 {
                     return;
                 }

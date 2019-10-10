@@ -19,20 +19,16 @@ namespace YQServer.Device
             if (CurrMsg.STATUS == 1)//TODO:判断专机启用
             {
                 //放行后等5秒再次放行
-                if (!LAST_PASS_TIME.HasValue || (DateTime.Now - LAST_PASS_TIME.Value).Seconds < 5)
-                {
-                    return;
-                }
-                LAST_PASS_TIME = DateTime.Now;
+                //if (LAST_PASS_TIME.HasValue &&  (DateTime.Now - LAST_PASS_TIME.Value).Seconds < 3)
+                //{
+                //    return;
+                //}
+                //LAST_PASS_TIME = DateTime.Now;
                 ControlMsg ctlMsg = new ControlMsg()
                 {
                     DEVICE_TYPE = msg.DEVICE_TYPE,
-                    NO = msg.NO,
-#if PASS
-                    COMMAND_ID = 2,//直接放行
-#else 
+                    NO = msg.NO, 
                     COMMAND_ID = 3,
-#endif
                     MESSAGE_TYPE = "control",
                     time_stamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
                 };
@@ -40,6 +36,11 @@ namespace YQServer.Device
             }
             else if (CurrMsg.STATUS == 4)//完成
             {
+                if (LAST_PASS_TIME.HasValue && (DateTime.Now - LAST_PASS_TIME.Value).Seconds < 3)
+                {
+                    return;
+                }
+                LAST_PASS_TIME = DateTime.Now;
                 ControlMsg ctlMsg = new ControlMsg()
                 {
                     DEVICE_TYPE = msg.DEVICE_TYPE,

@@ -15,6 +15,7 @@ namespace YQServer.Device
     {
         public override void DoWork(PLCMsg msg)
         {
+            //return;
             CurrMsg = msg;
             if (CurrMsg.STATUS == 1)//判断挡停放行
             {

@@ -13,12 +13,14 @@ namespace YQServer.Device
     /// </summary>
     public class E02101 : DeviceBase
     {
+        
         public override void DoWork(PLCMsg msg)
         {
             CurrMsg = msg;
-            //判断专机满表启动插针
+            AskPallet_Chutiao();
+            //判断专机满表启动插针            
             if (CurrMsg.PALLET_COUNT == 8
-                && !(CurrMsg.STATUS == 1 || CurrMsg.STATUS == 3))
+                && !(CurrMsg.STATUS == 1 || CurrMsg.STATUS == 2 || CurrMsg.STATUS == 3))
             {
                 ControlMsg ctlMsg = new ControlMsg()
                 {
@@ -32,8 +34,14 @@ namespace YQServer.Device
             }
             if (CurrMsg.STATUS == 1)//判断插针就绪
             {
-                //放行后等5秒再次放行
-                if (LAST_PASS_TIME.HasValue && (DateTime.Now - LAST_PASS_TIME.Value).Seconds < 5)
+                //判断其他专机非放行状态
+                var d2 = DeviceBase.GetDevice("E02102");
+                if (d2.CurrMsg?.STATUS == 2)
+                {
+                    return;
+                }
+                //放行后等10秒再次放行
+                if (LAST_PASS_TIME.HasValue && (DateTime.Now - LAST_PASS_TIME.Value).Seconds < 10)
                 {
                     return;
                 }

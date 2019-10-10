@@ -13,34 +13,51 @@ namespace YQServer.Device
     /// </summary>
     public class E00214 : DeviceBase
     {
+        private static DateTime LastCount8 = DateTime.Now;
+        private static int count = 0;
+        private static int LastNo = 1;//专机号1,2 = no%2+1
         public override void DoWork(PLCMsg msg)
         {
             CurrMsg = msg;
+            return;
             if (CurrMsg.STATUS == 1)//判断挡停放行
             {
-                int cmdid = 0;
-                //判断挡停后边专机空闲
-                var nxtDevice1 = DeviceBase.GetDevice("E02101");
-                var nxtDevice2 = DeviceBase.GetDevice("E02102");
-                if (nxtDevice1.CurrMsg?.STATUS == 0)
+                bool canpass = true;
+                if (count == 8)
                 {
-                    cmdid = 2;
+                    //判断托盘到位
+                    string strLastNo = "E0210" + LastNo;
+                    var lastDevice = DeviceBase.GetDevice(strLastNo);
+                    if (lastDevice.CurrMsg?.PALLET_COUNT == 8)//8个托盘到位了
+                    {
+                        //发送3
+                        ControlMsg ctlMsg = new ControlMsg()
+                        {
+                            DEVICE_TYPE = "E021",
+                            NO = strLastNo,
+                            COMMAND_ID = 3,
+                            MESSAGE_TYPE = "control",
+                            time_stamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
+                        };
+                        GlobalData.MQ.SentMessage(JsonConvert.SerializeObject(ctlMsg));//启动专机
+                        canpass = true;
+                        LastNo++;//换下一个专机
+                        LastNo = LastNo % 2 + 1;
+                        count = 0;
+                    }
+                    else
+                    {
+                        canpass = false;
+                    }
                 }
-                else if (nxtDevice2.CurrMsg?.STATUS == 0)
+                if (canpass)
                 {
-                    cmdid = 3;
-                }
-                else
-                {
-
-                }
-                if (cmdid != 0)
-                {
+                    count++;
                     var ctlMsg = new ControlMsg()
                     {
                         DEVICE_TYPE = msg.DEVICE_TYPE,
                         NO = msg.NO,
-                        COMMAND_ID = cmdid,
+                        COMMAND_ID = (LastNo + 1),//放行命令23 = no + 1
                         MESSAGE_TYPE = "control",
                         time_stamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
                     };

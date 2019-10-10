@@ -63,6 +63,16 @@ namespace YQPLCMgt.Helper
             }
             catch (SocketException ex)//接收超时异常不处理
             {
+                if (!socket.Connected)
+                {
+                    try
+                    {
+                        socket.Connect(new IPEndPoint(IPAddress.Parse(Scanner.IP), Scanner.Port));
+                    }
+                    catch
+                    {
+                    }
+                }
                 //continue;
             }
             catch (Exception ex)
@@ -102,6 +112,10 @@ namespace YQPLCMgt.Helper
         {
             try
             {
+                if (!socket.Connected)
+                {
+                    Connect();
+                }
                 socket.Send(data);
             }
             catch (Exception ex)

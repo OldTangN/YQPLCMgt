@@ -62,6 +62,9 @@ namespace YQPLCMgt.Helper
 
         protected abstract bool Send(byte[] data);
 
+        /// <summary>
+        /// 触发扫码，并等待结果返回
+        /// </summary>
         public void TriggerScan()
         {
             Task.Run(() =>

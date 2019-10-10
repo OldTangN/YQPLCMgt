@@ -18,11 +18,19 @@ namespace YQServer.Device
         /// </summary>
         private static List<int> flags = new List<int> { 11, 12, 13, 14, 15, 16 };
         private static int i = 0;//当前位置
+        private static DateTime LastStatus4 = DateTime.Now;
         public override void DoWork(PLCMsg msg)
         {
+            //if (CurrMsg != null && (Convert.ToDateTime(msg.time_stamp) - Convert.ToDateTime(CurrMsg.time_stamp)).Seconds < 3)
+            //    return;
             CurrMsg = msg;
             if (CurrMsg.STATUS == 4)//机器人抓完后
             {
+                if ((DateTime.Now - LastStatus4).Seconds < 10)//两次状态4之间超过10秒认为机器人抓完
+                {
+                    return;
+                }
+                LastStatus4 = DateTime.Now;
                 var stopBefore = DeviceBase.GetDevice("E00211");
                 var stopAfter = DeviceBase.GetDevice("E00212");
                 //判断前面托盘到位 && 判断后边托盘到位
@@ -42,31 +50,37 @@ namespace YQServer.Device
                     #endregion
 
                     #region 放行机器人前挡停 
-                    System.Threading.Thread.Sleep(500);//等抓走
-                    ControlMsg ctl_b_Msg = new ControlMsg()
+                    Task.Run(() =>
                     {
-                        NO = stopBefore.NO,
-                        DEVICE_TYPE = stopBefore.DEVICE_TYPE,
-                        COMMAND_ID = 2,
-                        MESSAGE_TYPE = "control",
-                        time_stamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
-                    };
-                    GlobalData.MQ.SentMessage(JsonConvert.SerializeObject(ctl_b_Msg));
+                        System.Threading.Thread.Sleep(2000);//等抓走
+                        ControlMsg ctl_b_Msg = new ControlMsg()
+                        {
+                            NO = stopBefore.NO,
+                            DEVICE_TYPE = stopBefore.DEVICE_TYPE,
+                            COMMAND_ID = 2,
+                            MESSAGE_TYPE = "control",
+                            time_stamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
+                        };
+                        GlobalData.MQ.SentMessage(JsonConvert.SerializeObject(ctl_b_Msg));
+                    });
                     #endregion
 
                     #region 放行机器人后挡停
                     if (i > 0 && i % flags.Count == 0)//判断放完6个
                     {
-                        System.Threading.Thread.Sleep(1000);//等放下
-                        ControlMsg ctl_af_Msg = new ControlMsg()
+                        Task.Run(() =>
                         {
-                            NO = stopAfter.NO,
-                            DEVICE_TYPE = stopAfter.DEVICE_TYPE,
-                            COMMAND_ID = 2,
-                            MESSAGE_TYPE = "control",
-                            time_stamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
-                        };
-                        GlobalData.MQ.SentMessage(JsonConvert.SerializeObject(ctl_af_Msg));
+                            System.Threading.Thread.Sleep(4000);//等放下
+                            ControlMsg ctl_af_Msg = new ControlMsg()
+                            {
+                                NO = stopAfter.NO,
+                                DEVICE_TYPE = stopAfter.DEVICE_TYPE,
+                                COMMAND_ID = 2,
+                                MESSAGE_TYPE = "control",
+                                time_stamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
+                            };
+                            GlobalData.MQ.SentMessage(JsonConvert.SerializeObject(ctl_af_Msg));
+                        });
                     }
                     #endregion
                 }

@@ -16,6 +16,18 @@ namespace YQServer.Device
         public override void DoWork(PLCMsg msg)
         {
             CurrMsg = msg;
+            //if (CurrMsg.STATUS == 1)
+            //{
+            //    ControlMsg ctlMsg = new ControlMsg()
+            //    {
+            //        DEVICE_TYPE = msg.DEVICE_TYPE,
+            //        NO = msg.NO,
+            //        COMMAND_ID = 2,
+            //        MESSAGE_TYPE = "control",
+            //        time_stamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
+            //    };
+            //    GlobalData.MQ.SentMessage(JsonConvert.SerializeObject(ctlMsg));//放行挡停
+            //}
         }
     }
 }

@@ -101,7 +101,7 @@ namespace YQServer
         {
             this.Dispatcher.Invoke(() =>
             {
-                if (rtxtMsg.Document.Blocks.Count > 10)
+                if (rtxtMsg.Document.Blocks.Count > 20)
                 {
                     rtxtMsg.Document.Blocks.Clear();
                 }

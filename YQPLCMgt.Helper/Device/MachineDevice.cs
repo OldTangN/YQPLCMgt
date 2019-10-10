@@ -30,6 +30,10 @@ namespace YQPLCMgt.Helper
         public string PLCIP { get; set; }
 
         public int Max_Pallet_Count { get; set; }
-    }
 
+        /// <summary>
+        /// 当前状态
+        /// </summary>
+        public int STATUS { get; set; } = -1;
+    }
 }

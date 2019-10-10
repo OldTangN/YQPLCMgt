@@ -15,11 +15,13 @@ namespace YQServer.Device
     {
         public override void DoWork(PLCMsg msg)
         {
+            //if (CurrMsg != null && (Convert.ToDateTime(msg.time_stamp) - Convert.ToDateTime(CurrMsg.time_stamp)).Seconds < 3)
+            //    return;
             CurrMsg = msg;
             if (CurrMsg.STATUS == 1)//判断专机放行
             {
                 //放行后等5秒再次放行
-                if (LAST_PASS_TIME.HasValue && (DateTime.Now - LAST_PASS_TIME.Value).Seconds < 5)
+                if (LAST_PASS_TIME.HasValue &&  (DateTime.Now - LAST_PASS_TIME.Value).Seconds < 3)
                 {
                     return;
                 }

@@ -17,9 +17,10 @@
         </RichTextBox>
         <DataGrid Name="dgDevices" AutoGenerateColumns="False" HorizontalContentAlignment="Center" HorizontalAlignment="Left" Height="496" Margin="473,38,0,0" VerticalAlignment="Top" Width="509">
             <DataGrid.Columns>
-                <DataGridTextColumn Header="编号" Width="100" Binding="{Binding Path=NO}"></DataGridTextColumn>
-                <DataGridTextColumn Header="名称" Width="200" Binding="{Binding Path=NAME}"></DataGridTextColumn>
-                <DataGridTextColumn Header="状态" Binding="{Binding Path=CurrMsg.STATUS}"></DataGridTextColumn>
+                <DataGridTextColumn Header="编号" Width="80" Binding="{Binding Path=NO}"></DataGridTextColumn>
+                <DataGridTextColumn Header="名称" Width="100" Binding="{Binding Path=NAME}"></DataGridTextColumn>
+                <DataGridTextColumn Header="托盘数" Binding="{Binding Path=CurrMsg.PALLET_COUNT}"></DataGridTextColumn>
+                <DataGridTextColumn Header="状态" Width="" Binding="{Binding Path=CurrMsg.STATUS}"></DataGridTextColumn>
                 <DataGridTextColumn Header="时间" Binding="{Binding Path=CurrMsg.time_stamp}"></DataGridTextColumn>
             </DataGrid.Columns>
         </DataGrid>

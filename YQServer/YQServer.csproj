@@ -120,7 +120,7 @@
     <Compile Include="Device\jiaobiao\E02202.cs" />
     <Compile Include="Device\jiaobiao\E02203.cs" />
     <Compile Include="Device\jiaobiao\E02204.cs" />
-    <Compile Include="Device\jiaobiao\E02301.cs" />
+    <Compile Include="Device\baozhuang\E02301.cs" />
     <Compile Include="Device\zuzhuang\E0100101.cs" />
     <Compile Include="Device\zuzhuang\E0100102.cs" />
     <Compile Include="Device\zuzhuang\E0100103.cs" />

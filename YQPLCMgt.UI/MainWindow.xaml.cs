@@ -84,7 +84,7 @@ namespace YQPLCMgt.UI
         {
             rtxtMsg.Dispatcher.Invoke(() =>
             {
-                if (rtxtMsg.Document.Blocks.Count > 100)
+                if (rtxtMsg.Document.Blocks.Count > 30)
                 {
                     rtxtMsg.Document.Blocks.Clear();
                 }
@@ -316,6 +316,21 @@ namespace YQPLCMgt.UI
                     }
                 }
             });
+        }
+
+        private void BtnShowInfo_Click(object sender, RoutedEventArgs e)
+        {
+            InfoWindow info = new InfoWindow();
+            info.DataContext = viewModel;
+            info.Show();
+        }
+
+        private void BtnClearBuffer_Click(object sender, RoutedEventArgs e)
+        {
+            viewModel.Source.MachineDevices?.ForEach(m => m.STATUS = -1);
+            viewModel.Source.StopDevices?.ForEach(s => s.STATUS = -1);
+            viewModel.Source.ScanDevices?.ForEach(s => s.Data = "");
+            AppendText("清理完毕！\r\n");
         }
     }
 }
