@@ -18,11 +18,11 @@
                 <DataGridTextColumn Header="状态" Width="50" Binding="{Binding Path=STATUS}"></DataGridTextColumn>
             </DataGrid.Columns>
         </DataGrid>
-        <DataGrid Name="dgScan" IsReadOnly="True" AutoGenerateColumns="False" Grid.Column="1" ItemsSource="{Binding Path=Scnners}">
+        <DataGrid Name="dgScan" IsReadOnly="True" AutoGenerateColumns="False" Grid.Column="1" ItemsSource="{Binding Path=Scanners}">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="编号" Width="80" Binding="{Binding Path=NO}"></DataGridTextColumn>
                 <DataGridTextColumn Header="名称" Width="100" Binding="{Binding Path=NAME}"></DataGridTextColumn>
-                <DataGridTextColumn Header="扫码值" Width="50" Binding="{Binding Path=STATUS}"></DataGridTextColumn>
+                <DataGridTextColumn Header="扫码值" Width="150" Binding="{Binding Path=Data}"></DataGridTextColumn>
             </DataGrid.Columns>
         </DataGrid>
     </Grid>

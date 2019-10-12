@@ -56,7 +56,7 @@ namespace YQPLCMgt.Helper
             }
         }
 
-        public abstract bool Connect();
+        public abstract bool Connect(bool autoTrigger = false);
 
         public abstract void DisConnect();
 

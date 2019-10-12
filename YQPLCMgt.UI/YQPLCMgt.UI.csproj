@@ -87,7 +87,6 @@
     <Compile Include="Model\TestMsg.cs" />
     <Compile Include="ViewModel\BrushConvert.cs" />
     <Compile Include="ViewModel\MainViewModel.cs" />
-    <Compile Include="ViewModel\ObservableObject.cs" />
     <Compile Include="ViewModel\RelayCommand.cs" />
     <Page Include="InfoWindow.xaml">
       <SubType>Designer</SubType>

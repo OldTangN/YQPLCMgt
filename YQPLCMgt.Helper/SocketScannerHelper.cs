@@ -22,21 +22,34 @@ namespace YQPLCMgt.Helper
 
         private List<byte> Buffer = new List<byte>();
 
+        private bool AutoTrigger = false;
+
         private CancellationTokenSource cancellation;
-        public override bool Connect()
+        public override bool Connect(bool autoTrigger = false)
         {
             try
             {
+                DisConnect();
                 cancellation = new CancellationTokenSource();
                 socket = new Socket(SocketType.Stream, ProtocolType.Tcp);
                 socket.ReceiveTimeout = 1000;//1s接收超时
                 socket.SendTimeout = 1000;//1s发送超时
                 socket.Connect(new IPEndPoint(IPAddress.Parse(Scanner.IP), Scanner.Port));
-                //Task tsk = new Task(() =>
-                //{
-                //    Receive();
-                //}, cancellation.Token);
-                //tsk.Start();
+                this.AutoTrigger = autoTrigger;
+                if (autoTrigger)
+                {
+                    Task.Run(() =>
+                    {
+                        while (!cancellation.IsCancellationRequested)
+                        {
+                            string data = Receive();
+                            if (!string.IsNullOrEmpty(data))
+                            {
+                                RaiseScanned(Scanner, data);
+                            }
+                        }
+                    }, cancellation.Token);
+                }
                 return true;
             }
             catch (Exception ex)
@@ -50,8 +63,6 @@ namespace YQPLCMgt.Helper
 
         protected override string Receive()
         {
-            //while (!cancellation.Token.IsCancellationRequested)
-            //{
             string data = "";
             try
             {
@@ -59,7 +70,6 @@ namespace YQPLCMgt.Helper
                 int len = socket.Receive(buffer);
                 byte[] bytArrData = buffer.Take(len).ToArray();
                 data = Encoding.ASCII.GetString(bytArrData);
-                //RaiseScanned(Scanner, data);
             }
             catch (SocketException ex)//接收超时异常不处理
             {
@@ -67,13 +77,12 @@ namespace YQPLCMgt.Helper
                 {
                     try
                     {
-                        socket.Connect(new IPEndPoint(IPAddress.Parse(Scanner.IP), Scanner.Port));
+                        Connect(this.AutoTrigger);
                     }
                     catch
                     {
                     }
                 }
-                //continue;
             }
             catch (Exception ex)
             {
@@ -92,8 +101,6 @@ namespace YQPLCMgt.Helper
                 RaiseError(errMsg);
             }
             return data;
-            //}
-
         }
 
         public override void DisConnect()
@@ -114,17 +121,33 @@ namespace YQPLCMgt.Helper
             {
                 if (!socket.Connected)
                 {
-                    Connect();
+                    Connect(this.AutoTrigger);
                 }
                 socket.Send(data);
+                return true;
             }
-            catch (Exception ex)
+            catch (Exception ex1)
             {
-                string errMsg = $"向{Scanner.IP}发送命令失败！";
-                MyLog.WriteLog(errMsg, ex);
+                string errMsg = $"向{Scanner.IP}发送命令失败！（1）";
+                MyLog.WriteLog(errMsg, ex1);
                 RaiseError(errMsg);
+                try
+                {
+                    if (!socket.Connected)
+                    {
+                        Connect(this.AutoTrigger);
+                    }
+                    socket.Send(data);
+                    return true;
+                }
+                catch (Exception ex2)
+                {
+                    string errMsg2 = $"向{Scanner.IP}发送命令失败！（2）";
+                    MyLog.WriteLog(errMsg2, ex2);
+                    RaiseError(errMsg2);
+                    return false;
+                }
             }
-            return true;
         }
     }
 }

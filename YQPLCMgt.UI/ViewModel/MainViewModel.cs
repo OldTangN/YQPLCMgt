@@ -35,7 +35,7 @@ namespace YQPLCMgt.UI.ViewModel
         public List<DeviceBase> MachineAndStop { get => _MachineAndStop; set => Set(ref _MachineAndStop, value); }
 
         private List<DeviceBase> _Scanners;
-        public List<DeviceBase> Scnners { get => _Scanners; set => Set(ref _Scanners, value); }
+        public List<DeviceBase> Scanners { get => _Scanners; set => Set(ref _Scanners, value); }
         #endregion
 
         #region private field
@@ -67,13 +67,13 @@ namespace YQPLCMgt.UI.ViewModel
             Source = new DataSource();
             _LstPLCs = CollectionViewSource.GetDefaultView(new List<string>()
             {
-                "全部","192.168.0.10", "192.168.0.20", "192.168.0.30"
+                "全部","10.50.57.40", "10.50.57.51", "10.50.57.61"
             });
             MachineAndStop = new List<DeviceBase>();
             MachineAndStop.AddRange(Source.StopDevices);
             MachineAndStop.AddRange(Source.MachineDevices);
-            Scnners = new List<DeviceBase>();
-            Scnners.AddRange(Source.ScanDevices);
+            Scanners = new List<DeviceBase>();
+            Scanners.AddRange(Source.ScanDevices);
         }
 
         #region 初始化
@@ -130,7 +130,7 @@ namespace YQPLCMgt.UI.ViewModel
                     scanHelper = new SocketScannerHelper(item);
                     scanHelper.OnScanned += ScannedCallback;
                     scanHelper.OnError += ShowMsg;
-                    if (!scanHelper.Connect())
+                    if (!scanHelper.Connect(item.NO == "E00101"))//有一把是自动触发的扫码枪
                     {
                         errComNames += item.IP + ",";
                     }
@@ -162,7 +162,7 @@ namespace YQPLCMgt.UI.ViewModel
                 {
                     plc_ips = new string[]
                     {
-                        "192.168.0.10", "192.168.0.20", "192.168.0.30"
+                        "10.50.57.40", "10.50.57.51", "10.50.57.61"
                     };
                 }
                 else
@@ -178,7 +178,7 @@ namespace YQPLCMgt.UI.ViewModel
                 PLC_Status = new bool[plc_ips.Length];
                 for (int i = 0; i < plcs.Length; i++)
                 {
-                    plcs[i] = new PLCHelper(plc_ips[i], 8501, true);
+                    plcs[i] = new PLCHelper(plc_ips[i], 8501, false);
                     plcs[i].OnShowMsg += ShowMsg;
                     PLC_Status[i] = plcs[i].Connect();
                     IsAllPLCConnected &= PLC_Status[i];
@@ -198,7 +198,7 @@ namespace YQPLCMgt.UI.ViewModel
         {
             ShowMsg("扫码:" + scan.IP + " -- " + data);
             scan.Data = data?.Replace("\r", "").Replace("\n", "");
-            RaisePropertyChanged("Scnners");
+            RaisePropertyChanged("Scanners");
             //格式条码+\r
             List<string> codes = data.Split('\r').ToList();
             codes.Sort((s1, s2) => { return s2.Length - s1.Length; });//托盘码最后传
@@ -219,14 +219,14 @@ namespace YQPLCMgt.UI.ViewModel
             //}
             foreach (var barcode in codes)
             {
-                if (string.IsNullOrEmpty(barcode) || barcode.Length < 4)//TODO:条码长度过滤非法数据
+                if (string.IsNullOrEmpty(barcode) || barcode.Length < 4 || barcode == "ERROR")//TODO:条码长度过滤非法数据
                 {
                     continue;
                 }
                 try
                 {
                     BarcodeMsg msg = new BarcodeMsg(scan.NO);
-                    msg.BAR_CODE = barcode.Split(',')[0];//TODO: 条码,库编号 识别6表位托盘
+                    msg.BAR_CODE = barcode.Split(';')[0];//TODO: 条码,库编号 识别6表位托盘
                     string strJson = JsonConvert.SerializeObject(msg);
                     mqClient?.SentMessage(strJson);
                 }
@@ -362,10 +362,7 @@ namespace YQPLCMgt.UI.ViewModel
         {
             return InitCompleted && IsAllPLCConnected;
         }
-        private int chutiao_count = 0;
-        private int fujiao_count = 0;
-        private DateTime lastChutiaoTime = DateTime.Now;
-        private DateTime lastFujiaoTime = DateTime.Now;
+       
         private void MonitorDevice()
         {
             int start = 100;
@@ -420,13 +417,13 @@ namespace YQPLCMgt.UI.ViewModel
                                             plcMsg.PALLET_COUNT = plcMsg.STATUS > 0 ? 1 : 0;
                                         }
                                         machine.PALLET_COUNT = plcMsg.PALLET_COUNT;
+                                        machine.STATUS = getValues[i];
                                         try
                                         {
                                             string strJson = JsonConvert.SerializeObject(plcMsg);
                                             mqClient?.SentMessage(strJson);
                                         }
                                         catch { }
-                                        machine.STATUS = getValues[i];
                                         Thread.Sleep(50);
                                     }
 
@@ -454,13 +451,14 @@ namespace YQPLCMgt.UI.ViewModel
                                         plcMsg.STATUS = getValues[i];
                                         plcMsg.PALLET_COUNT = plcMsg.STATUS > 0 ? 1 : 0;
                                         stop.PALLET_COUNT = plcMsg.PALLET_COUNT;
+                                        stop.STATUS = getValues[i];
                                         try
                                         {
                                             string strJson = JsonConvert.SerializeObject(plcMsg);
                                             mqClient?.SentMessage(strJson);
                                         }
                                         catch { }
-                                        stop.STATUS = getValues[i];
+                                       
                                         Thread.Sleep(50);
                                     }
                                     #endregion

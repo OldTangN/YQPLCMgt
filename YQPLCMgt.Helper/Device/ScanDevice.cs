@@ -23,6 +23,7 @@ namespace YQPLCMgt.Helper
 
         public List<string> LastScan { get; set; } = new List<string>();
 
-        public string Data { get; set; }
+        private string _Data;
+        public string Data { get => _Data; set => Set(ref _Data, value); }
     }
 }

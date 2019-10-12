@@ -27,9 +27,10 @@ namespace YQPLCMgt.Helper
 
         public string PLCIP { get; set; }
 
+        private int _STATUS = -1;
         /// <summary>
         /// 当前状态
         /// </summary>
-        public int STATUS { get; set; } = -1;
+        public int STATUS { get => _STATUS; set => Set(ref _STATUS, value); }
     }
 }

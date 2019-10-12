@@ -44,7 +44,7 @@
                     </Grid.RowDefinitions>
                     <StackPanel Grid.Row="0" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="10 0 0 0">
                         <TextBlock Margin="0 0 0 0">IP:</TextBlock>
-                        <TextBox Name="txtIP" Margin="0 0 0 0">192.168.0.10</TextBox>
+                        <TextBox Name="txtIP" Margin="0 0 0 0">10.50.57.40</TextBox>
                         <TextBlock Margin="20 0 0 0">Port:</TextBlock>
                         <TextBox Name="txtPort" Margin="0 0 0 0">8501</TextBox>
                         <Button Name="btnConnect" Content="连接" HorizontalAlignment="Left" Margin="20 0 0 0" Width="75" Click="BtnConnect_Click"/>

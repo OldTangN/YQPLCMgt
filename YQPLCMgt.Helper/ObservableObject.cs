@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace YQPLCMgt.UI.ViewModel
+namespace YQPLCMgt.Helper
 {
     public abstract class ObservableObject : INotifyPropertyChanged
     {

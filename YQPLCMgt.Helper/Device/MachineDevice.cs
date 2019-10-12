@@ -9,7 +9,7 @@ namespace YQPLCMgt.Helper
 
     public class MachineDevice : DeviceBase
     {
-        public MachineDevice(string no, string name, string dmAddrPallet, string dmAddrStatus, string plc_ip,int max_pallet_count) : base(no, name)
+        public MachineDevice(string no, string name, string dmAddrPallet, string dmAddrStatus, string plc_ip, int max_pallet_count) : base(no, name)
         {
             this.DMAddr_Pallet = dmAddrPallet;
             this.DMAddr_Status = dmAddrStatus;
@@ -31,9 +31,10 @@ namespace YQPLCMgt.Helper
 
         public int Max_Pallet_Count { get; set; }
 
+        private int _STATUS = -1;
         /// <summary>
         /// 当前状态
         /// </summary>
-        public int STATUS { get; set; } = -1;
+        public int STATUS { get => _STATUS; set => Set(ref _STATUS, value); }
     }
 }
