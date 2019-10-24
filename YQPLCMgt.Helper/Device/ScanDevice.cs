@@ -25,5 +25,8 @@ namespace YQPLCMgt.Helper
 
         private string _Data;
         public string Data { get => _Data; set => Set(ref _Data, value); }
+
+        private string _ScanTime;
+        public string ScanTime { get => _ScanTime; set => Set(ref _ScanTime, value); }
     }
 }

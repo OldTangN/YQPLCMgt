@@ -84,20 +84,11 @@ namespace YQPLCMgt.UI
         {
             rtxtMsg.Dispatcher.Invoke(() =>
             {
-                if (rtxtMsg.Document.Blocks.Count > 30)
+                if (rtxtMsg.Document.Blocks.Count > 200)
                 {
                     rtxtMsg.Document.Blocks.Clear();
                 }
-                if (txt.EndsWith("\r"))
-                {
-                    rtxtMsg.AppendText(txt);
-                }
-                else
-                {
-                    rtxtMsg.AppendText(txt + "\r");
-                }
-                rtxtMsg.ScrollToEnd();
-
+                rtxtMsg.AppendText(DateTime.Now.ToString("HH:mm:ss") + " -- " + txt + "\n");
             });
 
         }
@@ -123,10 +114,14 @@ namespace YQPLCMgt.UI
         private void Window_Closed(object sender, EventArgs e)
         {
             viewModel.Dispose();
+            Environment.Exit(0);
         }
 
         private void BtnTest_Click(object sender, RoutedEventArgs e)
         {
+            string strmsg = "{\"COMMAND_ID\":\"2\",\"DEVICE_TYPE\":\"\",\"NO\":\"E01501\",\"MESSAGE_TYPE\":\"control\",\"time_stamp\":\"2019 - 10 - 24 16:45:46\"}";
+            viewModel.MqClient_singleArrivalEvent(strmsg);
+            return;
             //List<string> codes = new List<string> { "1", "22", "333", "444", "666666", "55555" };
             //codes.Sort((s1, s2) => { return s2.Length - s1.Length; });
             //return;
@@ -329,6 +324,7 @@ namespace YQPLCMgt.UI
         {
             viewModel.Source.MachineDevices?.ForEach(m => m.STATUS = -1);
             viewModel.Source.StopDevices?.ForEach(s => s.STATUS = -1);
+            viewModel.Source.MachineDevices?.ForEach(m => m.PALLET_COUNT = 0);
             viewModel.Source.ScanDevices?.ForEach(s => s.Data = "");
             AppendText("清理完毕！\r\n");
         }

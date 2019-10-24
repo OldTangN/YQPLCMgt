@@ -32,7 +32,7 @@ namespace YQPLCMgt.Helper
                 DisConnect();
                 cancellation = new CancellationTokenSource();
                 socket = new Socket(SocketType.Stream, ProtocolType.Tcp);
-                socket.ReceiveTimeout = 1000;//1s接收超时
+                socket.ReceiveTimeout = 3000;//3s接收超时
                 socket.SendTimeout = 1000;//1s发送超时
                 socket.Connect(new IPEndPoint(IPAddress.Parse(Scanner.IP), Scanner.Port));
                 this.AutoTrigger = autoTrigger;
@@ -42,10 +42,17 @@ namespace YQPLCMgt.Helper
                     {
                         while (!cancellation.IsCancellationRequested)
                         {
-                            string data = Receive();
-                            if (!string.IsNullOrEmpty(data))
+                            try
                             {
-                                RaiseScanned(Scanner, data);
+                                string data = Receive();
+                                if (!string.IsNullOrEmpty(data))
+                                {
+                                    RaiseScanned(Scanner, data);
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                MyLog.WriteLog(ex);
                             }
                         }
                     }, cancellation.Token);
@@ -123,8 +130,12 @@ namespace YQPLCMgt.Helper
                 {
                     Connect(this.AutoTrigger);
                 }
-                socket.Send(data);
-                return true;
+                if (socket.Connected)
+                {
+                    socket.Send(data);
+                    return true;
+                }
+                return false;
             }
             catch (Exception ex1)
             {
@@ -137,8 +148,12 @@ namespace YQPLCMgt.Helper
                     {
                         Connect(this.AutoTrigger);
                     }
-                    socket.Send(data);
-                    return true;
+                    if (socket.Connected)
+                    {
+                        socket.Send(data);
+                        return true;
+                    }
+                    return false;
                 }
                 catch (Exception ex2)
                 {

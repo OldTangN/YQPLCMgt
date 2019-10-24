@@ -75,10 +75,19 @@ namespace YQServer
                     return;
                 }
             }
+            List<string> jiaobiaoNos = new List<string>()
+            {
+                "E00113", "E00114", "E00115", "E00117", "E02001",
+                "E02101", "E02201"//先跑初调1和复校1
+            };
             try
             {
                 if (msg.MESSAGE_TYPE == "plc")
                 {
+                    if (!jiaobiaoNos.Contains(msg.NO))
+                    {
+                        return;
+                    }
                     var dev = DeviceBase.GetDevice(msg.NO);
                     PLCMsg plcMsg = JsonConvert.DeserializeObject<PLCMsg>(data);
                     dev.DoWork(plcMsg);
