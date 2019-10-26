@@ -88,7 +88,7 @@ namespace YQPLCMgt.UI
                 {
                     rtxtMsg.Document.Blocks.Clear();
                 }
-                rtxtMsg.AppendText(DateTime.Now.ToString("HH:mm:ss") + " -- " + txt + "\n");
+                rtxtMsg.AppendText(DateTime.Now.ToString("HH:mm:ss.fff") + " -- " + txt + "\n");
             });
 
         }

@@ -11,6 +11,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using YQPLCMgt.Helper;
 
 namespace YQPLCMgt.UI
 {
@@ -22,6 +23,41 @@ namespace YQPLCMgt.UI
         public InfoWindow()
         {
             InitializeComponent();
+        }
+
+        private void dgDevice_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+           
+        }
+
+        private void MenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            if (dgDevice.SelectedItems != null && dgDevice.SelectedItems.Count > 0)
+            {
+                foreach (var item in dgDevice.SelectedItems)
+                {
+                    DeviceBase device = item as DeviceBase;
+                    if (device != null)
+                    {
+                        device.Enable = !device.Enable;
+                    }
+                }
+            }
+        }
+
+        private void MenuItemScan_Click(object sender, RoutedEventArgs e)
+        {
+            if (dgScan.SelectedItems != null && dgScan.SelectedItems.Count > 0)
+            {
+                foreach (var item in dgScan.SelectedItems)
+                {
+                    DeviceBase device = item as DeviceBase;
+                    if (device != null)
+                    {
+                        device.Enable = !device.Enable;
+                    }
+                }
+            }
         }
     }
 }

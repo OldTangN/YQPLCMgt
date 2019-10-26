@@ -487,6 +487,10 @@ namespace YQPLCMgt.UI.ViewModel
                     machine.PALLET_COUNT = plcMsg.PALLET_COUNT;
                     try
                     {
+                        if (!machine.Enable)
+                        {
+                            return;
+                        }
                         string strJson = JsonConvert.SerializeObject(plcMsg);
                         ShowMsg("发送：" + strJson);
                         mqClient?.SentMessage(strJson);
@@ -497,6 +501,7 @@ namespace YQPLCMgt.UI.ViewModel
                         MyLog.WriteLog("上传专机状态失败！", ex);
                     }
                 }
+                return;
             }
 
             //获取挡停
@@ -516,8 +521,8 @@ namespace YQPLCMgt.UI.ViewModel
                     {
                         //获取扫码枪
                         var scan = scanHelpers?.FirstOrDefault(p => p.Scanner.NO == stop.Scan_Device_No);
-                        if (scan != null)
-                        {
+                        if (scan != null && scan.Scanner.Enable)
+                        {                            
                             ShowMsg("触发扫码" + scan.Scanner.IP);
                             Task tsk = scan.TriggerScan();//触发扫码枪，进行扫码
                             if (scan.Scanner.NO == "E00106")//蜂鸣检测前绑码的扫码枪有2个
@@ -540,6 +545,10 @@ namespace YQPLCMgt.UI.ViewModel
                     stop.PALLET_COUNT = plcMsg.PALLET_COUNT;
                     try
                     {
+                        if (!stop.Enable)
+                        {
+                            return;
+                        }
                         string strJson = JsonConvert.SerializeObject(plcMsg);
                         ShowMsg("发送：" + strJson);
                         mqClient?.SentMessage(strJson);
