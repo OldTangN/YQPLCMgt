@@ -132,14 +132,13 @@ namespace YQPLCMgt.UI.ViewModel
                     scanHelper.OnError += ShowMsg;
                     if (!scanHelper.Connect(item.NO == "E00101"))//有一把是自动触发的扫码枪
                     {
-                        errComNames += item.IP + ",";
+                        errComNames += item.IP + ", ";
                     }
                     scanHelpers.Add(scanHelper);
                 }
 
                 if (!string.IsNullOrEmpty(errComNames))
                 {
-                    errComNames = errComNames.Remove(errComNames.Length - 1, 1);
                     ShowMsg("条码枪串口初始化失败——" + errComNames);
                 }
                 else
@@ -237,14 +236,16 @@ namespace YQPLCMgt.UI.ViewModel
                     }
                     msg.BAR_CODE = barcode.Split(';')[0];//TODO: 条码,库编号 识别6表位托盘
                     string strJson = JsonConvert.SerializeObject(msg);
-                    ShowMsg("发送：" + strJson);
+                    string logMsg = "发送:" + strJson;
+                    ShowMsg(logMsg);
+                    MyLog.WriteLog(logMsg, "MQ");
                     mqClient?.SentMessage(strJson);
                 }
                 catch (Exception ex)
                 {
                     string errMsg = "条码上报MQ服务器失败！";
-                    MyLog.WriteLog(errMsg, ex);
-                    OnShowMsg(errMsg);
+                    MyLog.WriteLog(errMsg, ex, "MQ");
+                    ShowMsg(errMsg);
                 }
             }
         }
@@ -255,6 +256,7 @@ namespace YQPLCMgt.UI.ViewModel
         /// <param name="data"></param>
         public void MqClient_singleArrivalEvent(string data)
         {
+            MyLog.WriteLog("接收:" + data, "MQ");
             ShowMsg(data);
             MsgBase msg = null;
             try
@@ -317,19 +319,6 @@ namespace YQPLCMgt.UI.ViewModel
                             ShowMsg(resp.ErrorMsg);
                         }
                     }
-
-                }
-                //else if (msg.MESSAGE_TYPE == "task")
-                //{
-                //    var tskMsg = JsonConvert.DeserializeObject<TaskMsg>(data);
-                //}
-                //else if (msg.MESSAGE_TYPE == "data")
-                //{
-                //    var dataMsg = JsonConvert.DeserializeObject<DataMsg>(data);
-                //}
-                else
-                {
-
                 }
             }
             catch (Exception ex)
@@ -348,14 +337,17 @@ namespace YQPLCMgt.UI.ViewModel
                 respMsg.NO = device.NO;
                 respMsg.PALLET_COUNT = device.PALLET_COUNT;
                 respMsg.STATUS = STATUS;
-                string strMsg = JsonConvert.SerializeObject(respMsg);
-                ShowMsg("应答：" + strMsg);
-                mqClient?.SentMessage(strMsg);
+                string strJson = JsonConvert.SerializeObject(respMsg);
+                string logMsg = "应答:" + strJson;
+                ShowMsg(logMsg);
+                MyLog.WriteLog(logMsg, "MQ");
+                mqClient?.SentMessage(strJson);
             }
             catch (Exception ex)
             {
-                MyLog.WriteLog(ex);
-                ShowMsg(ex.Message + "\r\n" + ex.StackTrace);
+                string errMsg = "应答主控下发的控制命令失败！";
+                MyLog.WriteLog(errMsg, ex, "MQ");
+                ShowMsg(errMsg + ex.Message + "\r\n" + ex.StackTrace);
             }
         }
 
@@ -396,6 +388,10 @@ namespace YQPLCMgt.UI.ViewModel
             {
                 try
                 {
+                    if (plcs == null || plcs.Length == 0)
+                    {
+                        break;
+                    }
                     foreach (var plc in plcs)
                     {
                         PLCResponse response = plc.Send($"RDS DM{start}.U {count}\r");//多台PLC读取批量DM
@@ -492,13 +488,16 @@ namespace YQPLCMgt.UI.ViewModel
                             return;
                         }
                         string strJson = JsonConvert.SerializeObject(plcMsg);
-                        ShowMsg("发送：" + strJson);
+                        string logMsg = "发送:" + strJson;
+                        ShowMsg(logMsg);
+                        MyLog.WriteLog(logMsg, "MQ");
                         mqClient?.SentMessage(strJson);
                     }
                     catch (Exception ex)
                     {
-                        ShowMsg("上传专机状态失败!");
-                        MyLog.WriteLog("上传专机状态失败！", ex);
+                        string errMsg = "上传专机状态失败!";
+                        ShowMsg(errMsg);
+                        MyLog.WriteLog(errMsg, ex, "MQ");
                     }
                 }
                 return;
@@ -522,8 +521,8 @@ namespace YQPLCMgt.UI.ViewModel
                         //获取扫码枪
                         var scan = scanHelpers?.FirstOrDefault(p => p.Scanner.NO == stop.Scan_Device_No);
                         if (scan != null && scan.Scanner.Enable)
-                        {                            
-                            ShowMsg("触发扫码" + scan.Scanner.IP);
+                        {
+                            ShowMsg("触发扫码:" + scan.Scanner.NAME + scan.Scanner.IP);
                             Task tsk = scan.TriggerScan();//触发扫码枪，进行扫码
                             if (scan.Scanner.NO == "E00106")//蜂鸣检测前绑码的扫码枪有2个
                             {
@@ -550,13 +549,16 @@ namespace YQPLCMgt.UI.ViewModel
                             return;
                         }
                         string strJson = JsonConvert.SerializeObject(plcMsg);
-                        ShowMsg("发送：" + strJson);
+                        string logMsg = "发送:" + strJson;
+                        ShowMsg(logMsg);
+                        MyLog.WriteLog(logMsg, "MQ");
                         mqClient?.SentMessage(strJson);
                     }
                     catch (Exception ex)
                     {
-                        ShowMsg("上传挡停状态失败!");
-                        MyLog.WriteLog("上传挡停状态失败！", ex);
+                        string errMsg = "上传挡停状态失败!";
+                        ShowMsg(errMsg);
+                        MyLog.WriteLog(errMsg, ex, "MQ");
                     }
                 }
             }

@@ -58,7 +58,7 @@ namespace YQPLCMgt.Helper
                 IsConnected = false;
                 string errMsg = $"连接PLC失败,IP:{IP},Port:{Port}";
                 ShowMsg(errMsg);
-                MyLog.WriteLog(errMsg, ex);
+                MyLog.WriteLog(errMsg, ex, "PLC");
                 return false;
             }
             return true;
@@ -105,10 +105,12 @@ namespace YQPLCMgt.Helper
                     tmpTimes++;
                     try
                     {
+                        string logMsg = DateTime.Now.ToString("HH:mm:ss.fff") + " [" + this.IP + "] 发送：" + cmdText;
                         if (ShowLog)
                         {
-                            ShowMsg(DateTime.Now.ToString("HH:mm:ss.fff") + " [" + this.IP + "] 发送：" + cmdText);
+                            ShowMsg(logMsg);
                         }
+                        MyLog.WriteLog(logMsg, "PLC");
                         byte[] sendBuffer = Encode(cmdText);
                         int sendLen = socket.Send(sendBuffer);
                         if (sendLen == sendBuffer.Length)//TODO:测试发送长度是否一致
@@ -120,7 +122,7 @@ namespace YQPLCMgt.Helper
                     catch (Exception ex)
                     {
                         string errMsg = $"[{this.IP}] 发送失败，当前第{tmpTimes}次！";
-                        MyLog.WriteLog(errMsg, ex);
+                        MyLog.WriteLog(errMsg, ex, "PLC");
                         ShowMsg(errMsg);
                         Connect();
                     }
@@ -148,7 +150,7 @@ namespace YQPLCMgt.Helper
                 {
                     resp.HasError = true;
                     resp.ErrorMsg = "[" + this.IP + "] PLC响应异常！";
-                    MyLog.WriteLog("[" + this.IP + "] PLC响应异常！", ex);
+                    MyLog.WriteLog("[" + this.IP + "] PLC响应异常！", ex, "PLC");
                 }
                 return resp;
             }

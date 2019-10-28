@@ -223,6 +223,7 @@ namespace YQPLCMgt.UI
         private int i = 0;
         private void BtnRobot2_Click(object sender, RoutedEventArgs e)
         {
+            return;
             if (plc == null || !plc.IsConnected)
             {
                 return;
@@ -266,51 +267,103 @@ namespace YQPLCMgt.UI
             });
         }
 
+        PLCHelper plcBig = new PLCHelper("10.50.57.51", 8501, false);
+        PLCHelper plcSmall = new PLCHelper("10.50.57.61", 8501, false);
+        CancellationTokenSource cancelSource = null;
         private int j = 0;
         private void BtnRobot3_Click(object sender, RoutedEventArgs e)
         {
-            if (plc == null || !plc.IsConnected)
+            plcBig?.DisConnect();
+            plcSmall?.DisConnect();
+            cancelSource?.Cancel();
+            if (!plcBig.Connect() || !plcSmall.Connect())
             {
+                MessageBox.Show("连接后2台PLC失败!");
                 return;
             }
-            btnRobot3.IsEnabled = false;
+            cancelSource = new CancellationTokenSource();
             Task.Run(() =>
             {
                 j = 0;
                 string strCmd = "";
                 int[] flags = new int[] { 11, 12, 13, 14, 15, 16, };//21, 22, 23, 24, 25, 26
-                while (true)
+                while (!cancelSource.IsCancellationRequested)
                 {
                     Thread.Sleep(1000);
-                    strCmd = $"RD DM234.U\r";
-                    var rltRead = plc.Send(strCmd);
-                    if (rltRead.HasError)
+                    //判断单托盘到位
+                    strCmd = $"RD DM116.U\r";
+                    var rltRead1 = plcSmall.Send(strCmd);
+                    if (rltRead1.HasError)
                     {
-                        AppendText(rltRead.ErrorMsg);
+                        AppendText(rltRead1.ErrorMsg);
+                        continue;
                     }
-                    else
+                    if (Convert.ToInt32(rltRead1.Text) != 1)
                     {
-                        if (Convert.ToInt32(rltRead.Text) == 4)
+                        continue;
+                    }
+                    //判断大托盘到位
+                    strCmd = $"RD DM115.U\r";
+                    var rltRead2 = plcBig.Send(strCmd);
+                    if (rltRead2.HasError)
+                    {
+                        AppendText(rltRead2.ErrorMsg);
+                        continue;
+                    }
+                    if (Convert.ToInt32(rltRead2.Text) != 1)
+                    {
+                        continue;
+                    }
+                    Thread.Sleep(1000);
+                    strCmd = $"RD DM234.U\r";//查询机器人状态
+                    var rltReadRobot = plcSmall.Send(strCmd);
+                    if (rltReadRobot.HasError)
+                    {
+                        AppendText(rltReadRobot.ErrorMsg);
+                        continue;
+                    }
+                    if (Convert.ToInt32(rltReadRobot.Text) == 4)
+                    {
+                        strCmd = $"WR DM234.U {flags[j]}\r";//从第一表位开始抓取
+                        var rltWriteRobot = plcSmall.Send(strCmd);
+                        if (rltWriteRobot.HasError)
                         {
-                            strCmd = $"WR DM234.U {flags[j]}\r";
-                            j++;
-                            if (j >= flags.Length)
+                            AppendText(rltWriteRobot.ErrorMsg);
+                            continue;
+                        }
+                        while (true)//等待抓取完成
+                        {
+                            Thread.Sleep(1000);
+                            strCmd = $"RD DM234.U\r";//查询机器人状态
+                            rltWriteRobot = plcSmall.Send(strCmd);
+                            if (rltWriteRobot.HasError)
                             {
-                                j = 0;
+                                AppendText(rltWriteRobot.ErrorMsg);
+                                continue;
                             }
-                            var rltWrite = plc.Send(strCmd);
-                            if (rltWrite.HasError)
+                            if (Convert.ToInt32(rltWriteRobot.Text) == 4)
                             {
-                                AppendText(rltWrite.ErrorMsg);
+                                strCmd = $"WR DM116.U 2\r";//放行小托盘
+                                plcSmall.Send(strCmd);
+                                if (flags[j] == 16)
+                                {
+                                    //放行大托盘
+                                    strCmd = $"WR DM115.U 2\r";//放行大托盘
+                                    plcBig.Send(strCmd);
+                                }
+                                break;
                             }
                         }
-                        else
+                        j++;
+                        if (j >= flags.Length)
                         {
-                            continue;
+                            j = 0;
                         }
                     }
                 }
-            });
+            }, cancelSource.Token);
+
+            MessageBox.Show("启动6转1抓表机器人成功！");
         }
 
         private void BtnShowInfo_Click(object sender, RoutedEventArgs e)

@@ -62,7 +62,6 @@
     <Compile Include="ScannerHelper.cs" />
     <Compile Include="SocketScannerHelper.cs" />
     <Compile Include="Device\ScanDevice.cs" />
-    <Compile Include="XMLHelper.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

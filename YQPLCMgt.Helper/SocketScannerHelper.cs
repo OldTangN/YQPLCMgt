@@ -52,7 +52,7 @@ namespace YQPLCMgt.Helper
                             }
                             catch (Exception ex)
                             {
-                                MyLog.WriteLog(ex);
+                                MyLog.WriteLog(ex, "SCAN");
                             }
                         }
                     }, cancellation.Token);
@@ -61,8 +61,8 @@ namespace YQPLCMgt.Helper
             }
             catch (Exception ex)
             {
-                string errMsg = $"连接扫码枪{Scanner.IP}失败！";
-                MyLog.WriteLog(errMsg, ex);
+                string errMsg = $"连接扫码枪{Scanner.NAME}{Scanner.IP}失败！";
+                MyLog.WriteLog(errMsg, ex, "SCAN");
                 RaiseError(errMsg);
             }
             return false;
@@ -77,6 +77,7 @@ namespace YQPLCMgt.Helper
                 int len = socket.Receive(buffer);
                 byte[] bytArrData = buffer.Take(len).ToArray();
                 data = Encoding.ASCII.GetString(bytArrData);
+                MyLog.WriteLog(this.Scanner.NAME + this.Scanner.IP + " 扫码值:" + (string.IsNullOrEmpty(data) ? "空" : data), "SCAN");
             }
             catch (SocketException ex)//接收超时异常不处理
             {
@@ -103,8 +104,8 @@ namespace YQPLCMgt.Helper
                     {
                     }
                 }
-                string errMsg = $"{Scanner.IP}接收数据处理异常！" + ex.Message;
-                MyLog.WriteLog(errMsg, ex);
+                string errMsg = $"{Scanner.NAME}{Scanner.IP}接收数据处理异常！" + ex.Message;
+                MyLog.WriteLog(errMsg, ex, "SCAN");
                 RaiseError(errMsg);
             }
             return data;
@@ -132,6 +133,9 @@ namespace YQPLCMgt.Helper
                 }
                 if (socket.Connected)
                 {
+                    string msg = "";
+                    data.ToList().ForEach(d => msg = msg + " " + d.ToString());
+                    MyLog.WriteLog(this.Scanner.NAME + this.Scanner.IP + " 发送：" + msg, "SCAN");
                     socket.Send(data);
                     return true;
                 }
@@ -139,8 +143,8 @@ namespace YQPLCMgt.Helper
             }
             catch (Exception ex1)
             {
-                string errMsg = $"向{Scanner.IP}发送命令失败！（1）";
-                MyLog.WriteLog(errMsg, ex1);
+                string errMsg = $"向{Scanner.NAME}{Scanner.IP}发送命令失败！（1）";
+                MyLog.WriteLog(errMsg, ex1, "SCAN");
                 RaiseError(errMsg);
                 try
                 {
@@ -157,8 +161,8 @@ namespace YQPLCMgt.Helper
                 }
                 catch (Exception ex2)
                 {
-                    string errMsg2 = $"向{Scanner.IP}发送命令失败！（2）";
-                    MyLog.WriteLog(errMsg2, ex2);
+                    string errMsg2 = $"向{Scanner.NAME}{Scanner.IP}发送命令失败！（2）";
+                    MyLog.WriteLog(errMsg2, ex2, "SCAN");
                     RaiseError(errMsg2);
                     return false;
                 }

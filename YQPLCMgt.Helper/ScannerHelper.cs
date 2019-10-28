@@ -88,7 +88,7 @@ namespace YQPLCMgt.Helper
                  bytStop = new byte[] { 0x16, 0x55, 0x0d };//停止
                  Send(bytStop);
                  Thread.Sleep(500);
-                 string data = Receive();
+                 string data = Receive();                
                  RaiseScanned(Scanner, data);
              });
         }
