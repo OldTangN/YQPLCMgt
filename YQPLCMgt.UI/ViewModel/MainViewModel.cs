@@ -193,30 +193,16 @@ namespace YQPLCMgt.UI.ViewModel
         /// </summary>
         /// <param name="scan"></param>
         /// <param name="strCodes"></param>
-        private void ScannedCallback(ScanDevice scan, string data)
+        private void ScannedCallback(ScanDevice scan, string stopNo, string data)
         {
             ShowMsg("扫码:" + scan.IP + " -- " + data);
             scan.Data = data?.Replace("\r", " | ").Replace("\n", "");
             scan.ScanTime = DateTime.Now.ToString("HH:mm:ss");
             RaisePropertyChanged("Scanners");
-            //格式条码+\r
+            //格式 条码+\r   0x0D
             List<string> codes = data.Split('\r').ToList();
             codes.Sort((s1, s2) => { return s2.Length - s1.Length; });//托盘码最后传
-            //bool repeat = true; //TODO:判断上次扫码结果一样
-            //if (scan.LastScan?.Count == codes.Count)
-            //{
-            //    foreach (var s in scan.LastScan)
-            //    {
-            //        if (!codes.Contains(s))
-            //        {
-            //            repeat = false;
-            //        }
-            //    }
-            //}
-            //if (repeat)
-            //{
-            //    return;
-            //}
+
             foreach (var barcode in codes)
             {
                 if (string.IsNullOrEmpty(barcode) || barcode.Length < 4 || barcode == "ERROR")//TODO:条码长度过滤非法数据
@@ -234,7 +220,26 @@ namespace YQPLCMgt.UI.ViewModel
                     {
                         msg = new BarcodeMsg(scan.NO);
                     }
-                    msg.BAR_CODE = barcode.Split(';')[0];//TODO: 条码,库编号 识别6表位托盘
+                    if (stopNo == "E00225")//耐压前1号挡停
+                    {
+                        //条码,库编号 识别1、2表位厂内码
+                        msg.BAR_CODE = barcode.Replace(",01", "1").Replace(",02", "2");
+                    }
+                    else if (stopNo == "E00226")//耐压前2号挡停
+                    {
+                        //条码,库编号 识别3、4表位厂内码
+                        msg.BAR_CODE = barcode.Replace(",01", "3").Replace(",02", "4");
+                    }
+                    else if (stopNo == "E00213") //耐压前3号挡停
+                    {
+                        //条码,库编号 识别5、6表位厂内码和大托盘码
+                        msg.BAR_CODE = barcode.Replace(",01", "5").Replace(",02", "6").Replace(",03", "7");
+                    }
+                    else
+                    {
+                        msg.BAR_CODE = barcode;
+                    }
+
                     string strJson = JsonConvert.SerializeObject(msg);
                     string logMsg = "发送:" + strJson;
                     ShowMsg(logMsg);
@@ -246,6 +251,28 @@ namespace YQPLCMgt.UI.ViewModel
                     string errMsg = "条码上报MQ服务器失败！";
                     MyLog.WriteLog(errMsg, ex, "MQ");
                     ShowMsg(errMsg);
+                }
+            }
+
+            if (stopNo == "E00225" || stopNo == "E00226")//耐压前1号、2号挡停
+            {
+                //扫到2个条码放行当前挡停
+                if (codes.Count != 2)
+                {
+                    return;
+                }
+                var stop = Source.StopDevices.FirstOrDefault(p => p.NO == stopNo);
+                if (stop != null)
+                {
+                    var plc = plcs.FirstOrDefault(p => p.IP == stop.PLCIP);
+                    if (plc != null)
+                    {
+                        var resp = plc.SetOnePoint(stop.DMAddr_Status, 2);
+                        if (resp.HasError)
+                        {
+                            ShowMsg(resp.Text);
+                        }
+                    }
                 }
             }
         }

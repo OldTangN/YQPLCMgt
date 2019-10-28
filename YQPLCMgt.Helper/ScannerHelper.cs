@@ -11,7 +11,7 @@ namespace YQPLCMgt.Helper
     public abstract class ScannerHelper
     {
         public ScanDevice Scanner { get; protected set; }
-        public event Action<ScanDevice, string> OnScanned;
+        public event Action<ScanDevice, string, string> OnScanned;
         public event Action<string> OnError;
 
         //private void SerialPort_DataReceived(object sender, SerialDataReceivedEventArgs e)
@@ -30,11 +30,11 @@ namespace YQPLCMgt.Helper
         //    }
         //}
 
-        protected void RaiseScanned(ScanDevice scan, string data)
+        protected void RaiseScanned(ScanDevice scan, string stopNo, string data)
         {
             try
             {
-                OnScanned?.Invoke(this.Scanner, data);
+                OnScanned?.Invoke(this.Scanner, stopNo, data);
             }
             catch (Exception ex)
             {
@@ -65,32 +65,34 @@ namespace YQPLCMgt.Helper
         /// <summary>
         /// 触发扫码，并等待结果返回
         /// </summary>
-        public Task TriggerScan()
+        public Task TriggerScan(string stopNo)
         {
-            return Task.Run(() =>
-             {
-                 #region 基恩士扫码枪默认触发命令
-                 //string strStart = "LON\r\n";
-                 //string strStop = "LOFF\r\n";
-                 //byte[] bytStart, bytStop;
-                 //bytStart = Encoding.ASCII.GetBytes(strStart);
-                 //Send(bytStart);
-                 //Thread.Sleep(500);//扫描500ms
-                 //bytStop = Encoding.ASCII.GetBytes(strStop);
-                 //Send(bytStop);
-                 #endregion
+            Task tsk = new Task((obj) =>
+            {
+                #region 基恩士扫码枪默认触发命令
+                //string strStart = "LON\r\n";
+                //string strStop = "LOFF\r\n";
+                //byte[] bytStart, bytStop;
+                //bytStart = Encoding.ASCII.GetBytes(strStart);
+                //Send(bytStart);
+                //Thread.Sleep(500);//扫描500ms
+                //bytStop = Encoding.ASCII.GetBytes(strStop);
+                //Send(bytStop);
+                #endregion
 
-                 byte[] bytStart, bytStop;
-                 bytStart = new byte[] { 0x16, 0x54, 0x0d };//启动
-                 Send(bytStart);
-                 //TODO:根据不同扫码枪设置超时时间
-                 Thread.Sleep(1500);//扫描时间1500ms  不可减少，防止119扫码枪扫码超时
-                 bytStop = new byte[] { 0x16, 0x55, 0x0d };//停止
-                 Send(bytStop);
-                 Thread.Sleep(500);
-                 string data = Receive();                
-                 RaiseScanned(Scanner, data);
-             });
+                byte[] bytStart, bytStop;
+                bytStart = new byte[] { 0x16, 0x54, 0x0d };//启动
+                Send(bytStart);
+                //TODO:根据不同扫码枪设置超时时间
+                Thread.Sleep(1500);//扫描时间1500ms  不可减少，防止119扫码枪扫码超时
+                bytStop = new byte[] { 0x16, 0x55, 0x0d };//停止
+                Send(bytStop);
+                Thread.Sleep(500);
+                string data = Receive();
+                RaiseScanned(Scanner, obj?.ToString(), data);
+            }, stopNo);
+            tsk.Start();
+            return tsk;
         }
 
         protected abstract string Receive();
