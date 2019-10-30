@@ -38,7 +38,7 @@ namespace YQPLCMgt.UI
             viewModel = new MainViewModel();
             viewModel.OnShowMsg += AppendText;
             this.DataContext = viewModel;
-            //Task.Run(() => { viewModel.Init(); });
+            Task.Run(() => { viewModel.Init(); });
             List<DeviceBase> lstDevices = new List<DeviceBase>();
             lstDevices.AddRange(viewModel.Source.StopDevices);
             lstDevices.AddRange(viewModel.Source.MachineDevices);

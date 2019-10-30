@@ -43,11 +43,11 @@ namespace YQPLCMgt.Helper
 
         private int _PALLET_COUNT;
         /// <summary>
-        /// 托盘数
+        /// 托盘数 
         /// </summary>
         public int PALLET_COUNT { get => _PALLET_COUNT; set => Set(ref _PALLET_COUNT, value); }
 
-        private bool _Enable = true;
+        private bool _Enable = false;
         /// <summary>
         /// 是否启用
         /// </summary>
