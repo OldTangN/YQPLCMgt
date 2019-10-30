@@ -161,7 +161,7 @@ namespace YQPLCMgt.UI
         {
             scan?.DisConnect();
             scan = new SocketScannerHelper(new ScanDevice("E00102", "人工PCB工位挡停前扫码枪", combScanner.SelectedValue.ToString(), 9004));
-            scan.OnScanned += (dev, data) =>
+            scan.OnScanned += (dev, stopNo, data) =>
             {
                 AppendText(idx++ + " -- " + data);
                 //格式条码+\r
@@ -182,7 +182,7 @@ namespace YQPLCMgt.UI
                 AppendText("连接扫码枪失败！");
                 return;
             }
-            scan.TriggerScan();//触发扫码枪指令
+            scan.TriggerScan("");//触发扫码枪指令
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
@@ -221,8 +221,35 @@ namespace YQPLCMgt.UI
 
 
         private int i = 0;
+        private int i2 = 1;
+        readonly object obj = new { };
         private void BtnRobot2_Click(object sender, RoutedEventArgs e)
         {
+            Task.Run(() =>
+            {
+                while (true)
+                {
+                    lock (obj)
+                    {
+                      
+                        Thread t = new Thread((obj) =>
+                        {
+                            lock (obj)
+                            {
+                                Thread.Sleep(1000);
+                                AppendText("2222222222:" + obj.ToString());
+                                i2++;
+                            }
+                        });
+                        t.IsBackground = true;
+                        AppendText("开始22222222222" );
+                        t.Start(i2);
+                        i++;
+                        AppendText("1111111111:" + i.ToString());
+                    }
+                    Thread.Sleep(1000);
+                }
+            });
             return;
             if (plc == null || !plc.IsConnected)
             {

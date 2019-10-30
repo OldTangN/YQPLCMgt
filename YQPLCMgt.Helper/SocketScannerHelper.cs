@@ -47,7 +47,7 @@ namespace YQPLCMgt.Helper
                                 string data = Receive();
                                 if (!string.IsNullOrEmpty(data))
                                 {
-                                    RaiseScanned(Scanner, data);
+                                    RaiseScanned(Scanner, "", data);
                                 }
                             }
                             catch (Exception ex)

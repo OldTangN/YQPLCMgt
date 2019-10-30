@@ -110,7 +110,10 @@ namespace YQPLCMgt.Helper
                         {
                             ShowMsg(logMsg);
                         }
-                        MyLog.WriteLog(logMsg, "PLC");
+                        if (!cmdText.StartsWith("RD"))
+                        {
+                            MyLog.WriteLog(logMsg, "PLC");
+                        }
                         byte[] sendBuffer = Encode(cmdText);
                         int sendLen = socket.Send(sendBuffer);
                         if (sendLen == sendBuffer.Length)//TODO:测试发送长度是否一致
@@ -141,10 +144,12 @@ namespace YQPLCMgt.Helper
                     resp.Text = Decode(buffer.Take(rcvLength).ToArray());
                     resp.Text = resp.Text.Replace("\n", "");
                     resp.Text = resp.Text.Split('\r')[0];//处理万一有粘包
+                    string rcvMsg = DateTime.Now.ToString("HH:mm:ss.fff") + " [" + this.IP + "] 接收：" + resp.Text;
                     if (ShowLog)
                     {
-                        ShowMsg(DateTime.Now.ToString("HH:mm:ss.fff") + " [" + this.IP + "] 接收：" + resp.Text);
+                        ShowMsg(rcvMsg);
                     }
+                    MyLog.WriteLog(rcvMsg);
                 }
                 catch (Exception ex)
                 {
@@ -170,6 +175,7 @@ namespace YQPLCMgt.Helper
 
         public PLCResponse SetOnePoint(string ioPoint, int val)
         {
+            MyLog.WriteLog($"{this.IP}设置{ioPoint}:{val}");
             return Send($"WR {ioPoint} {val}\r");
         }
 

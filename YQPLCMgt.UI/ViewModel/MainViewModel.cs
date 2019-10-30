@@ -147,6 +147,7 @@ namespace YQPLCMgt.UI.ViewModel
                 }
             });
         }
+
         private bool IsAllPLCConnected = true;
         /// <summary>
         /// 初始化PLC
@@ -201,14 +202,11 @@ namespace YQPLCMgt.UI.ViewModel
             RaisePropertyChanged("Scanners");
             //格式 条码+\r   0x0D
             List<string> codes = data.Split('\r').ToList();
+            codes.RemoveAll(p => string.IsNullOrEmpty(p) || p == "ERROR" || p.Length < 4);
             codes.Sort((s1, s2) => { return s2.Length - s1.Length; });//托盘码最后传
 
             foreach (var barcode in codes)
             {
-                if (string.IsNullOrEmpty(barcode) || barcode.Length < 4 || barcode == "ERROR")//TODO:条码长度过滤非法数据
-                {
-                    continue;
-                }
                 try
                 {
                     BarcodeMsg msg;
@@ -223,17 +221,17 @@ namespace YQPLCMgt.UI.ViewModel
                     if (stopNo == "E00225")//耐压前1号挡停
                     {
                         //条码,库编号 识别1、2表位厂内码
-                        msg.BAR_CODE = barcode.Replace(",01", "1").Replace(",02", "2");
+                        msg.BAR_CODE = barcode.Replace(",01", ",1").Replace(",02", ",2");
                     }
                     else if (stopNo == "E00226")//耐压前2号挡停
                     {
                         //条码,库编号 识别3、4表位厂内码
-                        msg.BAR_CODE = barcode.Replace(",01", "3").Replace(",02", "4");
+                        msg.BAR_CODE = barcode.Replace(",01", ",3").Replace(",02", ",4");
                     }
                     else if (stopNo == "E00213") //耐压前3号挡停
                     {
                         //条码,库编号 识别5、6表位厂内码和大托盘码
-                        msg.BAR_CODE = barcode.Replace(",01", "5").Replace(",02", "6").Replace(",03", "7");
+                        msg.BAR_CODE = barcode.Replace(",01", ",5").Replace(",02", ",6").Replace(",03", ",7");
                     }
                     else
                     {
@@ -245,6 +243,7 @@ namespace YQPLCMgt.UI.ViewModel
                     ShowMsg(logMsg);
                     MyLog.WriteLog(logMsg, "MQ");
                     mqClient?.SentMessage(strJson);
+                    Thread.Sleep(50);
                 }
                 catch (Exception ex)
                 {
@@ -317,15 +316,18 @@ namespace YQPLCMgt.UI.ViewModel
                         {
                             return;
                         }
-                        var resp = plc.SetOnePoint(stop.DMAddr_Status, ctlMsg.COMMAND_ID);
-                        if (!resp.HasError)
+                        lock (plcLockObj)
                         {
-                            stop.STATUS = ctlMsg.COMMAND_ID;
-                            ResponseServer(stop, ctlMsg.COMMAND_ID);
-                        }
-                        else
-                        {
-                            ShowMsg(resp.ErrorMsg);
+                            var resp = plc.SetOnePoint(stop.DMAddr_Status, ctlMsg.COMMAND_ID);
+                            if (!resp.HasError)
+                            {
+                                stop.STATUS = ctlMsg.COMMAND_ID;
+                                ResponseServer(stop, ctlMsg.COMMAND_ID);
+                            }
+                            else
+                            {
+                                ShowMsg(resp.ErrorMsg);
+                            }
                         }
                     }
                     if (machine != null)
@@ -335,15 +337,18 @@ namespace YQPLCMgt.UI.ViewModel
                         {
                             return;
                         }
-                        var resp = plc.SetOnePoint(machine.DMAddr_Status, ctlMsg.COMMAND_ID);
-                        if (!resp.HasError)
+                        lock (plcLockObj)
                         {
-                            machine.STATUS = ctlMsg.COMMAND_ID;
-                            ResponseServer(machine, ctlMsg.COMMAND_ID);
-                        }
-                        else
-                        {
-                            ShowMsg(resp.ErrorMsg);
+                            var resp = plc.SetOnePoint(machine.DMAddr_Status, ctlMsg.COMMAND_ID);
+                            if (!resp.HasError)
+                            {
+                                machine.STATUS = ctlMsg.COMMAND_ID;
+                                ResponseServer(machine, ctlMsg.COMMAND_ID);
+                            }
+                            else
+                            {
+                                ShowMsg(resp.ErrorMsg);
+                            }
                         }
                     }
                 }
@@ -390,22 +395,29 @@ namespace YQPLCMgt.UI.ViewModel
             {
                 if (_StartCmd == null)
                 {
-                    _StartCmd = new RelayCommand(Start);
+                    _StartCmd = new RelayCommand(Start, CanStart);
                 }
                 return _StartCmd;
             }
         }
-
+        private bool Listenning = false;
         private void Start()
         {
+            if (Listenning)
+            {
+                return;
+            }
             cancelToken = new CancellationTokenSource();
+            Listenning = true;
             Task.Run(new Action(MonitorDevice), cancelToken.Token);
         }
 
         private bool CanStart()
         {
-            return InitCompleted && IsAllPLCConnected;
+            return InitCompleted && IsAllPLCConnected && !Listenning;
         }
+
+        private readonly object plcLockObj = new { };//为了防止PLC读取上来数据，与主控下发控制数据时序混乱
 
         private void MonitorDevice()
         {
@@ -419,43 +431,46 @@ namespace YQPLCMgt.UI.ViewModel
                     {
                         break;
                     }
-                    foreach (var plc in plcs)
+                    lock (plcLockObj)
                     {
-                        PLCResponse response = plc.Send($"RDS DM{start}.U {count}\r");//多台PLC读取批量DM
-                        if (response.HasError)
+                        foreach (var plc in plcs)
                         {
-                            ShowMsg(response.ErrorMsg);
-                            continue;
-                        }
-                        if (_Source.ErrorMsg.Keys.Contains(response.Text))
-                        {
-                            ShowMsg(_Source.ErrorMsg[response.Text]);
-                            continue;
-                        }
-
-                        string[] getStrs = response.Text.Split(' ').ToArray();
-                        int[] getValues = new int[getStrs.Length];
-                        for (int i = 0; i < getStrs.Length; i++)
-                        {
-                            getValues[i] = Convert.ToInt32(getStrs[i]);
-                        }
-                        for (int i = 0; i < getValues.Length; i++)
-                        {
-                            Thread thread = new Thread(new ParameterizedThreadStart((paramArr) =>
+                            PLCResponse response = plc.Send($"RDS DM{start}.U {count}\r");//多台PLC读取批量DM
+                            if (response.HasError)
                             {
-                                try
+                                ShowMsg(response.ErrorMsg);
+                                continue;
+                            }
+                            if (_Source.ErrorMsg.Keys.Contains(response.Text))
+                            {
+                                ShowMsg(_Source.ErrorMsg[response.Text]);
+                                continue;
+                            }
+
+                            string[] getStrs = response.Text.Split(' ').ToArray();
+                            int[] getValues = new int[getStrs.Length];
+                            for (int i = 0; i < getStrs.Length; i++)
+                            {
+                                getValues[i] = Convert.ToInt32(getStrs[i]);
+                            }
+                            for (int i = 0; i < getValues.Length; i++)
+                            {
+                                Thread thread = new Thread(new ParameterizedThreadStart((paramArr) =>
                                 {
-                                    object[] objParam = paramArr as object[];
-                                    DealWithPLCStatus(Convert.ToInt32(objParam[0]), Convert.ToInt32(objParam[1]), objParam[2] as int[], objParam[3] as PLCHelper);
-                                }
-                                catch (Exception ex)
-                                {
-                                    MyLog.WriteLog("DealWithPLCStatus异常！", ex);
-                                    ShowMsg($"处理PLC读取到的状态值异常！{ex.Message}\r{ex.StackTrace}");
-                                }
-                            }));
-                            thread.IsBackground = true;
-                            thread.Start(new object[] { start, i, getValues, plc });
+                                    try
+                                    {
+                                        object[] objParam = paramArr as object[];
+                                        DealWithPLCStatus(Convert.ToInt32(objParam[0]), Convert.ToInt32(objParam[1]), objParam[2] as int[], objParam[3] as PLCHelper);
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        MyLog.WriteLog("DealWithPLCStatus异常！", ex);
+                                        ShowMsg($"处理PLC读取到的状态值异常！{ex.Message}\r{ex.StackTrace}");
+                                    }
+                                }));
+                                thread.IsBackground = true;
+                                thread.Start(new object[] { start, i, getValues, plc });
+                            }
                         }
                     }
                 }
@@ -550,13 +565,13 @@ namespace YQPLCMgt.UI.ViewModel
                         if (scan != null && scan.Scanner.Enable)
                         {
                             ShowMsg("触发扫码:" + scan.Scanner.NAME + scan.Scanner.IP);
-                            Task tsk = scan.TriggerScan();//触发扫码枪，进行扫码
+                            Task tsk = scan.TriggerScan(stop.NO);//触发扫码枪，进行扫码
                             if (scan.Scanner.NO == "E00106")//蜂鸣检测前绑码的扫码枪有2个
                             {
                                 tsk.ContinueWith((tskobj) =>
                                 {
                                     var scan2 = scanHelpers?.FirstOrDefault(p => p.Scanner.NO == "E00125");
-                                    scan2?.TriggerScan();//触发扫码枪，进行扫码
+                                    scan2?.TriggerScan("");//触发扫码枪，进行扫码
                                 });
                             }
                         }
@@ -611,12 +626,9 @@ namespace YQPLCMgt.UI.ViewModel
         {
             cancelToken?.Cancel();
             cancelToken = null;
-            if (PLC_Status != null && PLC_Status.Length > 0)
+            if (Listenning)
             {
-                for (int i = 0; i < PLC_Status.Length; i++)
-                {
-                    PLC_Status[i] = false;
-                }
+                Listenning = false;
             }
         }
 
