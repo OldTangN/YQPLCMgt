@@ -40,7 +40,7 @@ namespace YQPLCMgt.Helper
             {
                 string errMsg = "OnScanned事件委托异常！";
                 RaiseError(errMsg);
-                MyLog.WriteLog(errMsg, ex);
+                //MyLog.WriteLog(errMsg, ex);
             }
         }
 
@@ -80,16 +80,25 @@ namespace YQPLCMgt.Helper
                 //Send(bytStop);
                 #endregion
 
+                MyLog.WriteLog($"{this.Scanner.NAME}{this.Scanner.IP}触发扫码");
                 byte[] bytStart, bytStop;
                 bytStart = new byte[] { 0x16, 0x54, 0x0d };//启动
-                Send(bytStart);
-                //TODO:根据不同扫码枪设置超时时间
-                Thread.Sleep(1500);//扫描时间1500ms  不可减少，防止119扫码枪扫码超时
-                bytStop = new byte[] { 0x16, 0x55, 0x0d };//停止
-                Send(bytStop);
-                Thread.Sleep(500);
-                string data = Receive();
-                RaiseScanned(Scanner, obj?.ToString(), data);
+                if (Connect(false))//重新连接，防止历史数据干扰
+                {
+                    Send(bytStart);
+                    //TODO:根据不同扫码枪设置超时时间
+                    Thread.Sleep(1500);//扫描时间1500ms  不可减少，防止119扫码枪扫码超时
+                    bytStop = new byte[] { 0x16, 0x55, 0x0d };//停止
+                    Send(bytStop);
+                    Thread.Sleep(100);
+                    string data = Receive();
+                    DisConnect();
+                    RaiseScanned(Scanner, obj?.ToString(), data);
+                }
+                else
+                {
+                    RaiseError($"{this.Scanner.NAME}{this.Scanner.IP}扫码枪无法连接!");
+                }
             }, stopNo);
             tsk.Start();
             return tsk;

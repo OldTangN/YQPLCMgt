@@ -203,6 +203,10 @@ namespace YQPLCMgt.UI.ViewModel
             //格式 条码+\r   0x0D
             List<string> codes = data.Split('\r').ToList();
             codes.RemoveAll(p => string.IsNullOrEmpty(p) || p == "ERROR" || p.Length < 4);
+            if (codes.Count > scan.MaxBarcodeCount)//扫码值超过最大扫码个数
+            {
+                codes.RemoveRange(0, codes.Count - scan.MaxBarcodeCount);//保留最后符合数量的扫码值
+            }
             codes.Sort((s1, s2) => { return s2.Length - s1.Length; });//托盘码最后传
 
             foreach (var barcode in codes)
@@ -292,7 +296,7 @@ namespace YQPLCMgt.UI.ViewModel
             catch (Exception ex)
             {
                 string errMsg = "协议格式错误！";
-                MyLog.WriteLog(errMsg, ex);
+                MyLog.WriteLog(errMsg, ex, "MQ");
                 ShowMsg(errMsg);
                 return;
             }
@@ -464,7 +468,7 @@ namespace YQPLCMgt.UI.ViewModel
                                     }
                                     catch (Exception ex)
                                     {
-                                        MyLog.WriteLog("DealWithPLCStatus异常！", ex);
+                                        //MyLog.WriteLog("DealWithPLCStatus异常！", ex);
                                         ShowMsg($"处理PLC读取到的状态值异常！{ex.Message}\r{ex.StackTrace}");
                                     }
                                 }));
@@ -476,7 +480,7 @@ namespace YQPLCMgt.UI.ViewModel
                 }
                 catch (Exception ex)
                 {
-                    MyLog.WriteLog("MonitorDevice异常！", ex);
+                    //MyLog.WriteLog("MonitorDevice异常！", ex);
                     ShowMsg($"MonitorDevice异常！{ex.Message}\r{ex.StackTrace}");
                 }
                 finally
@@ -662,7 +666,7 @@ namespace YQPLCMgt.UI.ViewModel
             }
             catch (Exception ex)
             {
-                MyLog.WriteLog("OnShowMsg委托调用异常！", ex);
+                //MyLog.WriteLog("OnShowMsg委托调用异常！", ex);
             }
         }
     }

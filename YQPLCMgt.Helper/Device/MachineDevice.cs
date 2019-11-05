@@ -9,7 +9,7 @@ namespace YQPLCMgt.Helper
 
     public class MachineDevice : DeviceBase
     {
-        public MachineDevice(string no, string name, string dmAddrPallet, string dmAddrStatus, string plc_ip, int max_pallet_count) : base(no, name)
+        public MachineDevice(int lineno, string no, string name, string dmAddrPallet, string dmAddrStatus, string plc_ip, int max_pallet_count) : base(lineno, no, name)
         {
             this.DMAddr_Pallet = dmAddrPallet;
             this.DMAddr_Status = dmAddrStatus;

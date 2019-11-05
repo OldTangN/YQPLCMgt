@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace YQPLCMgt.Helper
@@ -129,6 +130,7 @@ namespace YQPLCMgt.Helper
                         ShowMsg(errMsg);
                         Connect();
                     }
+                    Thread.Sleep(100);
                 } while (tmpTimes <= tryTimes);
 
                 if (resp.HasError)//发送失败
@@ -149,7 +151,7 @@ namespace YQPLCMgt.Helper
                     {
                         ShowMsg(rcvMsg);
                     }
-                    MyLog.WriteLog(rcvMsg);
+                    //MyLog.WriteLog(rcvMsg,"PLC");
                 }
                 catch (Exception ex)
                 {
@@ -169,13 +171,13 @@ namespace YQPLCMgt.Helper
             }
             catch (Exception ex)
             {
-                MyLog.WriteLog("ShowMsg回调函数异常！", ex);
+                //MyLog.WriteLog("ShowMsg回调函数异常！", ex);
             }
         }
 
         public PLCResponse SetOnePoint(string ioPoint, int val)
         {
-            MyLog.WriteLog($"{this.IP}设置{ioPoint}:{val}");
+            MyLog.WriteLog($"{this.IP}设置{ioPoint}:{val}","PLC");
             return Send($"WR {ioPoint} {val}\r");
         }
 

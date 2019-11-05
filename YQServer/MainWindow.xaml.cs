@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -121,6 +122,18 @@ namespace YQServer
         private void Window_Closed(object sender, EventArgs e)
         {
             Environment.Exit(0);
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            Task.Run(()=> {
+
+                while (true)
+                {
+                    Thread.Sleep(10);
+                    MyLog.WriteLog("fdskfjdslfjdslfjdslfjsljdskfsdkl", "SCAN");
+                }
+            });
         }
     }
 }

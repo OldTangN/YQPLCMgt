@@ -84,7 +84,7 @@ namespace YQPLCMgt.UI
             }
             foreach (var stop in lstStop)
             {
-                StopDevice stopDevice = new StopDevice(stop[1], stop[2], stop[3], stop[4], stop[5]);
+                StopDevice stopDevice = new StopDevice(Convert.ToInt32(stop[0]),stop[1], stop[2], stop[3], stop[4], stop[5]);
                 StopDevices.Add(stopDevice);
             }
         }
@@ -102,7 +102,7 @@ namespace YQPLCMgt.UI
             }
             foreach (var scan in lstScan)
             {
-                ScanDevice scanDevice = new ScanDevice(scan[0], scan[1], scan[2], 9004);
+                ScanDevice scanDevice = new ScanDevice(Convert.ToInt32(scan[0]), scan[1], scan[2], scan[3], Convert.ToInt32(scan[4]), 9004);
                 ScanDevices.Add(scanDevice);
             }
         }
@@ -117,7 +117,7 @@ namespace YQPLCMgt.UI
             }
             foreach (var m in lstMachine)
             {
-                MachineDevice machineDevice = new MachineDevice(m[1], m[2], m[3], m[4], m[5],Convert.ToInt32(m[6]));
+                MachineDevice machineDevice = new MachineDevice(Convert.ToInt32(m[0]), m[1], m[2], m[3], m[4], m[5], Convert.ToInt32(m[6]));
                 MachineDevices.Add(machineDevice);
             }
         }

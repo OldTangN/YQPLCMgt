@@ -8,11 +8,17 @@ namespace YQPLCMgt.Helper
 {
     public class ScanDevice : DeviceBase
     {
-        public ScanDevice(string no, string name, string ip, int port = 9004) : base(no, name)
+        public ScanDevice(int lineno, string no, string name, string ip, int maxBarcodeCount, int port) : base(lineno, no, name)
         {
             this.IP = ip;
             this.Port = port;
+            this.MaxBarcodeCount = maxBarcodeCount;
         }
+
+        /// <summary>
+        /// 最大扫码个数
+        /// </summary>
+        public int MaxBarcodeCount { get; set; } = 1;
 
         /// <summary>
         ///IP地址 端口默认9004

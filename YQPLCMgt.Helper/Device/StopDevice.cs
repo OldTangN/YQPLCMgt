@@ -8,7 +8,7 @@ namespace YQPLCMgt.Helper
 {
     public class StopDevice : DeviceBase
     {
-        public StopDevice(string no, string name, string dmAddrStatus,string scan_device_no,string plc_ip) : base(no, name)
+        public StopDevice(int lineno, string no, string name, string dmAddrStatus, string scan_device_no, string plc_ip) : base(lineno, no, name)
         {
             this.DMAddr_Status = dmAddrStatus;
             this.Scan_Device_No = scan_device_no;

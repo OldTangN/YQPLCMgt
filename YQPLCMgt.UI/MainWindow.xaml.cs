@@ -160,21 +160,18 @@ namespace YQPLCMgt.UI
         private void BtnScanTest_Click(object sender, RoutedEventArgs e)
         {
             scan?.DisConnect();
-            scan = new SocketScannerHelper(new ScanDevice("E00102", "人工PCB工位挡停前扫码枪", combScanner.SelectedValue.ToString(), 9004));
+            scan = new SocketScannerHelper(new ScanDevice(0, "", "", combScanner.SelectedValue.ToString(), 3, 9004));
             scan.OnScanned += (dev, stopNo, data) =>
             {
                 AppendText(idx++ + " -- " + data);
-                //格式条码+\r
+                //格式 条码+\r   0x0D
                 List<string> codes = data.Split('\r').ToList();
-                codes.Sort((s1, s2) => { return s2.Length - s1.Length; });//托盘码最后传
-                foreach (var barcode in codes)
+                codes.RemoveAll(p => string.IsNullOrEmpty(p) || p == "ERROR" || p.Length < 4);
+                if (codes.Count > dev.MaxBarcodeCount)//扫码值超过最大扫码个数
                 {
-                    if (string.IsNullOrEmpty(barcode) || barcode.Length < 4)//TODO:条码长度过滤非法数据
-                    {
-                        continue;
-                    }
-                    AppendText(" ---- " + barcode);
+                    codes.RemoveRange(0, codes.Count - dev.MaxBarcodeCount);//保留最后符合数量的扫码值
                 }
+                codes.Sort((s1, s2) => { return s2.Length - s1.Length; });//托盘码最后传
             };
             scan.OnError += AppendText;
             if (!scan.Connect())
@@ -222,7 +219,7 @@ namespace YQPLCMgt.UI
 
         private int i = 0;
         private int i2 = 1;
-        readonly object obj = new { };
+        private readonly object obj = new { };
         private void BtnRobot2_Click(object sender, RoutedEventArgs e)
         {
             Task.Run(() =>
@@ -231,7 +228,7 @@ namespace YQPLCMgt.UI
                 {
                     lock (obj)
                     {
-                      
+
                         Thread t = new Thread((obj) =>
                         {
                             lock (obj)
@@ -242,7 +239,7 @@ namespace YQPLCMgt.UI
                             }
                         });
                         t.IsBackground = true;
-                        AppendText("开始22222222222" );
+                        AppendText("开始22222222222");
                         t.Start(i2);
                         i++;
                         AppendText("1111111111:" + i.ToString());
@@ -294,9 +291,9 @@ namespace YQPLCMgt.UI
             });
         }
 
-        PLCHelper plcBig = new PLCHelper("10.50.57.51", 8501, false);
-        PLCHelper plcSmall = new PLCHelper("10.50.57.61", 8501, false);
-        CancellationTokenSource cancelSource = null;
+        private PLCHelper plcBig = new PLCHelper("10.50.57.51", 8501, false);
+        private PLCHelper plcSmall = new PLCHelper("10.50.57.61", 8501, false);
+        private CancellationTokenSource cancelSource = null;
         private int j = 0;
         private void BtnRobot3_Click(object sender, RoutedEventArgs e)
         {

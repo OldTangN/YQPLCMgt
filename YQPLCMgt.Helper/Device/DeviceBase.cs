@@ -9,8 +9,9 @@ namespace YQPLCMgt.Helper
     public class DeviceBase : ObservableObject
     {
 
-        public DeviceBase(string no, string name)
+        public DeviceBase(int lineno,string no, string name)
         {
+            this.LineNo = lineno;
             this.NO = no;
             try
             {
@@ -22,6 +23,8 @@ namespace YQPLCMgt.Helper
             }
             this.NAME = name;
         }
+
+        public int LineNo { get; set; }
 
         private string _NO;
         /// <summary>

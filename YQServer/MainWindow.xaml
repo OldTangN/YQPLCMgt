@@ -24,5 +24,6 @@
                 <DataGridTextColumn Header="时间" Binding="{Binding Path=CurrMsg.time_stamp}"></DataGridTextColumn>
             </DataGrid.Columns>
         </DataGrid>
+        <Button Content="Button" HorizontalAlignment="Left" Margin="109,13,0,0" VerticalAlignment="Top" Width="75" Click="Button_Click"/>
     </Grid>
 </Window>
