@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:YQPLCMgt.UI"
         mc:Ignorable="d"
-        Title="InfoWindow" Height="600" Width="1000">
+        Title="设备状态查看" Height="600" Width="1000" Closing="Window_Closing" Loaded="Window_Loaded">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="400"></ColumnDefinition>

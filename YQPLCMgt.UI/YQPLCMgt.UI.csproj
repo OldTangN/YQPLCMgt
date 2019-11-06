@@ -84,7 +84,6 @@
     <Compile Include="InfoWindow.xaml.cs">
       <DependentUpon>InfoWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Model\Barcode.cs" />
     <Compile Include="Model\TestMsg.cs" />
     <Compile Include="ViewModel\BrushConvert.cs" />
     <Compile Include="ViewModel\MainViewModel.cs" />
