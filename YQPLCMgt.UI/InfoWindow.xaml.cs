@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using RabbitMQ.YQMsg;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -27,7 +29,7 @@ namespace YQPLCMgt.UI
             InitializeComponent();
         }
 
-        private void MenuItem_Click(object sender, RoutedEventArgs e)
+        private void miEnableOrNot_Click(object sender, RoutedEventArgs e)
         {
             MenuItem mi = sender as MenuItem;
             ContextMenu ctxMenu = mi.Parent as ContextMenu;
@@ -125,6 +127,116 @@ namespace YQPLCMgt.UI
         {
             viewModel = DataContext as MainViewModel;
             ReadCfg();
+        }
+
+        private void MiReSendMsg_Click(object sender, RoutedEventArgs e)
+        {
+            MenuItem mi = sender as MenuItem;
+            ContextMenu ctxMenu = mi.Parent as ContextMenu;
+            DataGrid dataGrid = ctxMenu.PlacementTarget as DataGrid;
+            if (dataGrid.SelectedItems != null && dataGrid.SelectedItems.Count > 0)
+            {
+                foreach (var item in dataGrid.SelectedItems)
+                {
+                    DeviceBase device = item as DeviceBase;
+                    if (device is StopDevice)
+                    {
+                        try
+                        {
+                            StopDevice stop = device as StopDevice;
+                            PLCMsg msg = new PLCMsg()
+                            {
+                                NO = stop.NO,
+                                DEVICE_TYPE = stop.DEVICE_TYPE,
+                                PALLET_COUNT = stop.PALLET_COUNT,
+                                STATUS = stop.STATUS,
+                                MESSAGE_TYPE = "plc",
+                                time_stamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff")
+                            };
+                            string strMsg = JsonConvert.SerializeObject(msg);
+                            viewModel?.mqClient?.SentMessage(strMsg);
+                            MessageBox.Show("发送挡停信息完毕！");
+                        }
+                        catch (Exception ex)
+                        {
+                            MyLogLib.MyLog.WriteLog("手动发送挡停信息失败！", ex);
+                            MessageBox.Show("发送挡停信息失败！");
+                        }
+                    }
+                    else if (device is MachineDevice)
+                    {
+                        try
+                        {
+                            MachineDevice machine = device as MachineDevice;
+                            PLCMsg msg = new PLCMsg()
+                            {
+                                NO = machine.NO,
+                                DEVICE_TYPE = machine.DEVICE_TYPE,
+                                PALLET_COUNT = machine.PALLET_COUNT,
+                                STATUS = machine.STATUS,
+                                MESSAGE_TYPE = "plc",
+                                time_stamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff")
+                            };
+                            string strMsg = JsonConvert.SerializeObject(msg);
+                            viewModel?.mqClient?.SentMessage(strMsg);
+                            MessageBox.Show("发送挡停信息完毕！");
+                        }
+                        catch (Exception ex)
+                        {
+                            MyLogLib.MyLog.WriteLog("手动发送专机信息失败！", ex);
+                            MessageBox.Show("发送专机信息失败！");
+                        }
+                    }
+                    else if (device is ScanDevice)
+                    {
+                        //try
+                        //{
+                        //    ScanDevice scan = device as ScanDevice;
+                        //    string[] arrBarcode = scan.Data.Split('|');
+                        //    foreach (var barcode in arrBarcode)
+                        //    {
+                        //        if (string.IsNullOrEmpty(barcode))
+                        //        {
+                        //            continue;
+                        //        }
+                        //        BarcodeMsg msg = new BarcodeMsg(scan.NO)
+                        //        {
+                        //            NO = scan.NO,
+                        //            BAR_CODE = barcode,
+                        //        };
+                        //        string strMsg = JsonConvert.SerializeObject(msg);
+                        //        viewModel?.mqClient?.SentMessage(strMsg);
+                        //    }
+                        //    MessageBox.Show("发送挡停信息完毕！");
+                        //}
+                        //catch (Exception ex)
+                        //{
+                        //    MyLogLib.MyLog.WriteLog("手动发送扫码信息失败！", ex);
+                        //    MessageBox.Show("发送扫码信息失败！");
+                        //}
+                    }
+                }
+            }
+        }
+
+        private void MiReScan_Click(object sender, RoutedEventArgs e)
+        {
+            MenuItem mi = sender as MenuItem;
+            ContextMenu ctxMenu = mi.Parent as ContextMenu;
+            DataGrid dataGrid = ctxMenu.PlacementTarget as DataGrid;
+            if (dataGrid.SelectedItems != null && dataGrid.SelectedItems.Count > 0)
+            {
+                foreach (var item in dataGrid.SelectedItems)
+                {
+                    ScanDevice scan = item as ScanDevice;
+                    var stop = viewModel.Source.StopDevices.FirstOrDefault(p => p.Scan_Device_No == scan.NO);
+                    if (stop == null || string.IsNullOrEmpty(stop.Scan_Device_No))
+                    {
+                        continue;
+                    }
+                    viewModel.TriggerScan(stop);
+                }
+            }
         }
     }
 }

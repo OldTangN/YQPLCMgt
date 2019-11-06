@@ -119,8 +119,8 @@ namespace YQPLCMgt.UI
 
         private void BtnTest_Click(object sender, RoutedEventArgs e)
         {
-            string strmsg = "{\"COMMAND_ID\":\"2\",\"DEVICE_TYPE\":\"\",\"NO\":\"E01501\",\"MESSAGE_TYPE\":\"control\",\"time_stamp\":\"2019 - 10 - 24 16:45:46\"}";
-            viewModel.MqClient_singleArrivalEvent(strmsg);
+            //string strmsg = "{\"COMMAND_ID\":\"2\",\"DEVICE_TYPE\":\"\",\"NO\":\"E01501\",\"MESSAGE_TYPE\":\"control\",\"time_stamp\":\"2019 - 10 - 24 16:45:46\"}";
+            //viewModel.MqClient_singleArrivalEvent(strmsg);
             return;
             //List<string> codes = new List<string> { "1", "22", "333", "444", "666666", "55555" };
             //codes.Sort((s1, s2) => { return s2.Length - s1.Length; });

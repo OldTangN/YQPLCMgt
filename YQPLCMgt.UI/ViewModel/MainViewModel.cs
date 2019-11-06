@@ -47,7 +47,7 @@ namespace YQPLCMgt.UI.ViewModel
 
         private DataSource _Source;
         private CancellationTokenSource cancelToken;
-        private ClientMQ mqClient;
+        public ClientMQ mqClient;
 
         private bool _InitCompleted = false;
         /// <summary>
@@ -197,7 +197,7 @@ namespace YQPLCMgt.UI.ViewModel
         private void ScannedCallback(ScanDevice scan, string stopNo, string data)
         {
             ShowMsg("扫码:" + scan.IP + " -- " + data);
-            scan.Data = data?.Replace("\r", " | ").Replace("\n", "");
+            scan.Data = "";//data?.Replace("\r", " | ").Replace("\n", "");
             scan.ScanTime = DateTime.Now.ToString("HH:mm:ss");
             RaisePropertyChanged("Scanners");
             //格式 条码+\r   0x0D
@@ -210,7 +210,7 @@ namespace YQPLCMgt.UI.ViewModel
             codes.Sort((s1, s2) => { return s2.Length - s1.Length; });//托盘码最后传
 
             foreach (var barcode in codes)
-            {
+            {               
                 try
                 {
                     BarcodeMsg msg;
@@ -241,7 +241,7 @@ namespace YQPLCMgt.UI.ViewModel
                     {
                         msg.BAR_CODE = barcode;
                     }
-
+                    scan.Data += (msg.BAR_CODE + "|");
                     string strJson = JsonConvert.SerializeObject(msg);
                     string logMsg = "发送:" + strJson;
                     ShowMsg(logMsg);
@@ -284,7 +284,7 @@ namespace YQPLCMgt.UI.ViewModel
         /// MQ消息接收回调
         /// </summary>
         /// <param name="data"></param>
-        public void MqClient_singleArrivalEvent(string data)
+        private void MqClient_singleArrivalEvent(string data)
         {
             MyLog.WriteLog("接收:" + data, "MQ");
             ShowMsg(data);
@@ -564,21 +564,7 @@ namespace YQPLCMgt.UI.ViewModel
                     #region 根据挡停状态触发扫码枪
                     if (stop.STATUS == 1 && !string.IsNullOrEmpty(stop.Scan_Device_No))//有托盘
                     {
-                        //获取扫码枪
-                        var scan = scanHelpers?.FirstOrDefault(p => p.Scanner.NO == stop.Scan_Device_No);
-                        if (scan != null && scan.Scanner.Enable)
-                        {
-                            ShowMsg("触发扫码:" + scan.Scanner.NAME + scan.Scanner.IP);
-                            Task tsk = scan.TriggerScan(stop.NO);//触发扫码枪，进行扫码
-                            if (scan.Scanner.NO == "E00106")//蜂鸣检测前绑码的扫码枪有2个
-                            {
-                                tsk.ContinueWith((tskobj) =>
-                                {
-                                    var scan2 = scanHelpers?.FirstOrDefault(p => p.Scanner.NO == "E00125");
-                                    scan2?.TriggerScan("");//触发扫码枪，进行扫码
-                                });
-                            }
-                        }
+                        TriggerScan(stop);
                     }
                     #endregion
 
@@ -609,6 +595,25 @@ namespace YQPLCMgt.UI.ViewModel
                 }
             }
             #endregion
+        }
+
+        public void TriggerScan(StopDevice stop)
+        {
+            //获取扫码枪
+            var scan = scanHelpers?.FirstOrDefault(p => p.Scanner.NO == stop.Scan_Device_No);
+            if (scan != null && scan.Scanner.Enable)
+            {
+                ShowMsg("触发扫码:" + scan.Scanner.NAME + scan.Scanner.IP);
+                Task tsk = scan.TriggerScan(stop.NO);//触发扫码枪，进行扫码
+                if (scan.Scanner.NO == "E00106")//蜂鸣检测前绑码的扫码枪有2个
+                {
+                    tsk.ContinueWith((tskobj) =>
+                    {
+                        var scan2 = scanHelpers?.FirstOrDefault(p => p.Scanner.NO == "E00125");
+                        scan2?.TriggerScan("");//触发扫码枪，进行扫码
+                    });
+                }
+            }
         }
         #endregion
 

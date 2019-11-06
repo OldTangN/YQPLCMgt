@@ -25,7 +25,8 @@
                 </DataGrid.Columns>
                 <DataGrid.ContextMenu>
                     <ContextMenu>
-                        <MenuItem Header="Set Enable/Disable" Click="MenuItem_Click"></MenuItem>
+                        <MenuItem Header="启用/停用" Click="miEnableOrNot_Click"></MenuItem>
+                        <MenuItem Header="重新上传" Click="MiReSendMsg_Click"></MenuItem>                        
                     </ContextMenu>
                 </DataGrid.ContextMenu>
             </DataGrid>
@@ -39,7 +40,8 @@
                 </DataGrid.Columns>
                 <DataGrid.ContextMenu>
                     <ContextMenu>
-                        <MenuItem Header="Set Enable/Disable" Click="MenuItem_Click"></MenuItem>
+                        <MenuItem Header="启用/停用" Click="miEnableOrNot_Click"></MenuItem>
+                        <MenuItem Header="重新上传" Click="MiReSendMsg_Click"></MenuItem>
                     </ContextMenu>
                 </DataGrid.ContextMenu>
             </DataGrid>
@@ -54,7 +56,8 @@
             </DataGrid.Columns>
             <DataGrid.ContextMenu>
                 <ContextMenu>
-                    <MenuItem Header="Set Enable/Disable" Click="MenuItem_Click"></MenuItem>
+                    <MenuItem Header="启用/停用" Click="miEnableOrNot_Click"></MenuItem>
+                    <MenuItem Header="触发扫码" Click="MiReScan_Click"></MenuItem>
                 </ContextMenu>
             </DataGrid.ContextMenu>
         </DataGrid>
