@@ -27,7 +27,7 @@ namespace YQPLCMgt.UI.ViewModel
         public bool InitCompleted { get => _InitCompleted; set => Set(ref _InitCompleted, value); }
 
         public bool[] PLC_Status { get => _PLC_Status; set => Set(ref _PLC_Status, value); }
-
+        public bool UploadMQ { get => _uploadMQ; set => Set(ref _uploadMQ, value); }
         private ICollectionView _LstPLCs;
         public ICollectionView LstPLCs => _LstPLCs;
 
@@ -39,11 +39,13 @@ namespace YQPLCMgt.UI.ViewModel
         #endregion
 
         #region private field
+        private bool _uploadMQ = true;
         private bool _PLC1_Status = false;
         private bool _PLC2_Status = false;
         private bool _PLC3_Status = false;
 
         private bool[] _PLC_Status = new bool[3] { true, true, true };
+        private bool isBusy = false;
 
         private DataSource _Source;
         private CancellationTokenSource cancelToken;
@@ -79,10 +81,22 @@ namespace YQPLCMgt.UI.ViewModel
         #region 初始化
         public async void Init()
         {
-            await InitMQ();
-            await InitPLC();
-            await InitScan();
-            InitCompleted = true;
+            if (InitCompleted)
+            {
+                if (System.Windows.MessageBox.Show("已经初始化过，是否重新初始化？", "重新初始化", System.Windows.MessageBoxButton.YesNo) != System.Windows.MessageBoxResult.Yes)
+                {
+                    return;
+                }
+            }
+            await Task.Run(async () =>
+            {
+                isBusy = true;
+                await InitMQ();
+                await InitPLC();
+                await InitScan();
+                InitCompleted = true;
+                isBusy = false;
+            });
         }
 
         /// <summary>
@@ -203,14 +217,16 @@ namespace YQPLCMgt.UI.ViewModel
             //格式 条码+\r   0x0D
             List<string> codes = data.Split('\r').ToList();
             codes.RemoveAll(p => string.IsNullOrEmpty(p) || p == "ERROR" || p.Length < 4);
-            if (codes.Count > scan.MaxBarcodeCount)//扫码值超过最大扫码个数
+            if (codes.Count != scan.MaxBarcodeCount)//扫码值超过最大扫码个数
             {
-                codes.RemoveRange(0, codes.Count - scan.MaxBarcodeCount);//保留最后符合数量的扫码值
+                ShowMsg($"有效条码数量{codes.Count}不等于扫码枪限制数量{scan.MaxBarcodeCount}!");
+                return;
+                //codes.RemoveRange(0, codes.Count - scan.MaxBarcodeCount);//保留最后符合数量的扫码值
             }
             codes.Sort((s1, s2) => { return s2.Length - s1.Length; });//托盘码最后传
 
             foreach (var barcode in codes)
-            {               
+            {
                 try
                 {
                     BarcodeMsg msg;
@@ -242,11 +258,14 @@ namespace YQPLCMgt.UI.ViewModel
                         msg.BAR_CODE = barcode;
                     }
                     scan.Data += (msg.BAR_CODE + "|");
-                    string strJson = JsonConvert.SerializeObject(msg);
-                    string logMsg = "发送:" + strJson;
-                    ShowMsg(logMsg);
-                    MyLog.WriteLog(logMsg, "MQ");
-                    mqClient?.SentMessage(strJson);
+                    if (UploadMQ)
+                    {
+                        string strJson = JsonConvert.SerializeObject(msg);
+                        string logMsg = "发送:" + strJson;
+                        ShowMsg(logMsg);
+                        MyLog.WriteLog(logMsg, "MQ");
+                        mqClient?.SentMessage(strJson);
+                    }
                     Thread.Sleep(50);
                 }
                 catch (Exception ex)
@@ -300,7 +319,16 @@ namespace YQPLCMgt.UI.ViewModel
                 ShowMsg(errMsg);
                 return;
             }
-
+            DateTime dtMsg = DateTime.Now;
+            if (!DateTime.TryParse(msg.time_stamp, out dtMsg))
+            {
+                return;
+            }
+            if ((DateTime.Now - dtMsg).Seconds > 3 * 60000)
+            {
+                ShowMsg("3分钟之前的消息不处理！");
+                return;
+            }
             try
             {
                 if (msg.MESSAGE_TYPE == "control")
@@ -533,11 +561,14 @@ namespace YQPLCMgt.UI.ViewModel
                         {
                             return;
                         }
-                        string strJson = JsonConvert.SerializeObject(plcMsg);
-                        string logMsg = "发送:" + strJson;
-                        ShowMsg(logMsg);
-                        MyLog.WriteLog(logMsg, "MQ");
-                        mqClient?.SentMessage(strJson);
+                        if (UploadMQ)
+                        {
+                            string strJson = JsonConvert.SerializeObject(plcMsg);
+                            string logMsg = "发送:" + strJson;
+                            ShowMsg(logMsg);
+                            MyLog.WriteLog(logMsg, "MQ");
+                            mqClient?.SentMessage(strJson);
+                        }
                     }
                     catch (Exception ex)
                     {
@@ -580,11 +611,14 @@ namespace YQPLCMgt.UI.ViewModel
                         {
                             return;
                         }
-                        string strJson = JsonConvert.SerializeObject(plcMsg);
-                        string logMsg = "发送:" + strJson;
-                        ShowMsg(logMsg);
-                        MyLog.WriteLog(logMsg, "MQ");
-                        mqClient?.SentMessage(strJson);
+                        if (UploadMQ)
+                        {
+                            string strJson = JsonConvert.SerializeObject(plcMsg);
+                            string logMsg = "发送:" + strJson;
+                            ShowMsg(logMsg);
+                            MyLog.WriteLog(logMsg, "MQ");
+                            mqClient?.SentMessage(strJson);
+                        }
                     }
                     catch (Exception ex)
                     {
@@ -607,11 +641,16 @@ namespace YQPLCMgt.UI.ViewModel
                 Task tsk = scan.TriggerScan(stop.NO);//触发扫码枪，进行扫码
                 if (scan.Scanner.NO == "E00106")//蜂鸣检测前绑码的扫码枪有2个
                 {
-                    tsk.ContinueWith((tskobj) =>
+                    tsk.ContinueWith((tskobj, stateobj) =>
                     {
+                        ScannerHelper s = stateobj as ScannerHelper;
+                        if (string.IsNullOrEmpty(s.Scanner.Data))//如果液晶条码没有扫到，不触发托盘扫码
+                        {
+                            return;
+                        }
                         var scan2 = scanHelpers?.FirstOrDefault(p => p.Scanner.NO == "E00125");
                         scan2?.TriggerScan("");//触发扫码枪，进行扫码
-                    });
+                    }, scan);
                 }
             }
         }
@@ -644,6 +683,9 @@ namespace YQPLCMgt.UI.ViewModel
         #endregion
 
         #region InitPlcCmd
+        private RelayCommand _InitCmd;
+        public RelayCommand InitCmd => _InitPlcCmd ?? (_InitCmd = new RelayCommand(() => { Init(); }, () => { return !isBusy; }));
+
         private RelayCommand _InitPlcCmd;
         public RelayCommand InitPlcCmd => _InitPlcCmd ?? (_InitPlcCmd = new RelayCommand(() => { InitPLC(); }));
 

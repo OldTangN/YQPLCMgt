@@ -181,6 +181,11 @@ namespace YQPLCMgt.Helper
             return Send($"WR {ioPoint} {val}\r");
         }
 
+        public PLCResponse ReadOnePoint(string ioPoint)
+        {
+            MyLog.WriteLog($"{this.IP}读取{ioPoint}", "PLC");
+            return Send($"RD {ioPoint}.U\r");           
+        }
         private byte[] Encode(string msg)
         {
             return Encoding.UTF8.GetBytes(msg);

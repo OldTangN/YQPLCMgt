@@ -30,6 +30,9 @@ namespace YQPLCMgt.Helper
         public List<string> LastScan { get; set; } = new List<string>();
 
         private string _Data;
+        /// <summary>
+        /// 扫描到的有效条码，以竖线分割
+        /// </summary>
         public string Data { get => _Data; set => Set(ref _Data, value); }
 
         private string _ScanTime;

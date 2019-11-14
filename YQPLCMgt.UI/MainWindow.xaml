@@ -17,22 +17,29 @@
         </Grid.RowDefinitions>
         <TabControl Grid.Row="0" BorderBrush="Black" BorderThickness="0 1 0 1" Height="150" HorizontalAlignment="Stretch" VerticalAlignment="Top">
             <TabItem Header="运行" Width="60">
-                <StackPanel Orientation="Horizontal" VerticalAlignment="Top">
-                    <ComboBox Height="22"  Width="120" ItemsSource="{Binding LstPLCs, UpdateSourceTrigger=PropertyChanged}" IsSynchronizedWithCurrentItem="True"/>
-                    <Button Command="{Binding StartCmd}" Content="开始" HorizontalAlignment="Left" Margin="10 0" Width="75"/>
-                    <Button Command="{Binding StopCmd}" Content="停止" HorizontalAlignment="Left" Margin="10 0" Width="75"/>
-                    <Button Name="btnClearBuffer" Content="清上次缓存" Click="BtnClearBuffer_Click" HorizontalAlignment="Left" Margin="10 0" Width="75"/>
-                    <TextBlock VerticalAlignment="Center"><Run Text="PLC连接状态："/></TextBlock>
-                    <TextBlock VerticalAlignment="Center"><Run Text="组装"/></TextBlock>
-                    <Ellipse Width="30" Height="30" Fill="{Binding PLC_Status[0], Converter={StaticResource converter}}"/>
-                    <TextBlock VerticalAlignment="Center"><Run Text="校表"/></TextBlock>
-                    <Ellipse Width="30" Height="30" Fill="{Binding PLC_Status[1], Converter={StaticResource converter}}"/>
-                    <TextBlock VerticalAlignment="Center"><Run Text="包装"/></TextBlock>
-                    <Ellipse Width="30" Height="30" Fill="{Binding PLC_Status[2], Converter={StaticResource converter}}"/>
-                    <Button x:Name="btnInitPlc" Content="初始化PLC" Margin="5 0" Width="75" Command="{Binding InitPlcCmd}"/>
-                    <Button x:Name="btnInitMQ" Content="初始化MQ" Margin="5 0" Width="75" Command="{Binding InitMQCmd}"/>
-                    <Button x:Name="btnInitScanner" Content="初始化扫码枪" Margin="5 0" Width="75" Command="{Binding InitScannerCmd}"/>
-                    <Button x:Name="btnShowInfo" Content="状态查看" Margin="5 0" Width="75" Click="BtnShowInfo_Click"/>
+                <StackPanel Orientation="Vertical" VerticalAlignment="Top">
+                    <StackPanel Orientation="Horizontal"  VerticalAlignment="Center" Height="30" Margin="10">
+                        <Button Command="{Binding InitCmd}" Content="初始化" HorizontalAlignment="Left" Margin="10 0" Width="75"/>
+                        <Button Command="{Binding StartCmd}" Content="开始上传" HorizontalAlignment="Left" Margin="10 0" Width="75"/>
+                        <Button Command="{Binding StopCmd}" Content="停止上传" HorizontalAlignment="Left" Margin="10 0" Width="75"/>
+                        <Button Name="btnClearBuffer" Content="全部重新上传" Click="BtnClearBuffer_Click" HorizontalAlignment="Left" Margin="10 0" Width="75"/>
+                        <Button x:Name="btnShowInfo" Content="状态查看" Margin="5 0" Width="75" Click="BtnShowInfo_Click"/>
+                        <TextBlock VerticalAlignment="Center" Margin="20 0 0 0"><Run Text="PLC连接状态："/></TextBlock>
+                        <TextBlock VerticalAlignment="Center"><Run Text="组装"/></TextBlock>
+                        <Ellipse Width="30" Height="30" Fill="{Binding PLC_Status[0], Converter={StaticResource converter}}"/>
+                        <TextBlock VerticalAlignment="Center"><Run Text="校表"/></TextBlock>
+                        <Ellipse Width="30" Height="30" Fill="{Binding PLC_Status[1], Converter={StaticResource converter}}"/>
+                        <TextBlock VerticalAlignment="Center"><Run Text="包装"/></TextBlock>
+                        <Ellipse Width="30" Height="30" Fill="{Binding PLC_Status[2], Converter={StaticResource converter}}"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Height="30" Margin="10">
+                        <ComboBox Height="22"  Width="100" ItemsSource="{Binding LstPLCs, UpdateSourceTrigger=PropertyChanged}" IsSynchronizedWithCurrentItem="True"/>
+                        <Button x:Name="btnInitPlc" Content="初始化PLC" Margin="5 0" Width="75" Command="{Binding InitPlcCmd}"/>
+                        <Button x:Name="btnInitMQ" Content="初始化MQ" Margin="5 0" Width="75" Command="{Binding InitMQCmd}"/>
+                        <Button x:Name="btnInitScanner" Content="初始化扫码枪" Margin="5 0" Width="75" Command="{Binding InitScannerCmd}"/>
+                        <CheckBox Margin="10 0 0 0" Content="上传MQ" VerticalAlignment="Center" IsChecked="{Binding Path=UploadMQ,UpdateSourceTrigger=PropertyChanged}"/>
+                    </StackPanel>
+                
                 </StackPanel>
             </TabItem>
             <TabItem Header="测试" Width="60">
@@ -42,41 +49,45 @@
                         <RowDefinition></RowDefinition>
                         <RowDefinition></RowDefinition>
                     </Grid.RowDefinitions>
-                    <StackPanel Grid.Row="0" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="10 0 0 0">
-                        <TextBlock Margin="0 0 0 0">IP:</TextBlock>
-                        <TextBox Name="txtIP" Margin="0 0 0 0">10.50.57.40</TextBox>
-                        <TextBlock Margin="20 0 0 0">Port:</TextBlock>
-                        <TextBox Name="txtPort" Margin="0 0 0 0">8501</TextBox>
-                        <Button Name="btnConnect" Content="连接" HorizontalAlignment="Left" Margin="20 0 0 0" Width="75" Click="BtnConnect_Click"/>
-                        <Button Name="btnDisConnect" Content="断开"  HorizontalAlignment="Left" Margin="20 0 0 0" Width="75" Click="BtnDisConnect_Click"/>
+                    <Border Margin="10 0 0 0" BorderThickness="1" BorderBrush="Black">
+                        <StackPanel Grid.Row="0" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="10 0 0 0">
+                            <TextBlock Margin="0 0 0 0">IP:</TextBlock>
+                            <TextBox Name="txtIP" Margin="0 0 0 0">10.50.57.40</TextBox>
+                            <TextBlock Margin="20 0 0 0">Port:</TextBlock>
+                            <TextBox Name="txtPort" Margin="0 0 0 0">8501</TextBox>
+                            <Button Name="btnConnect" Content="连接" HorizontalAlignment="Left" Margin="20 0 0 0" Width="75" Click="BtnConnect_Click"/>
+                            <Button Name="btnDisConnect" Content="断开"  HorizontalAlignment="Left" Margin="20 0 0 0" Width="75" Click="BtnDisConnect_Click"/>
 
-                        <Border Margin="10 0 0 0" BorderThickness="1" BorderBrush="Black">
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock >扫码枪：</TextBlock>
-                                <ComboBox Name="combScanner" Width="200" DisplayMemberPath="NAME" SelectedValuePath="IP" ItemsSource="{Binding Path=Source.ScanDevices}" IsSynchronizedWithCurrentItem="True">
-                                </ComboBox>
-                                <Button x:Name="btnScanTest" Content="扫码触发测试" Margin="10 0 0 0"  Width="85" Click="BtnScanTest_Click"/>
+
+                            <StackPanel  Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10 0 0 0">
+                                <ComboBox Name="cmbSend" SelectedValuePath="Value" DisplayMemberPath="Key" ItemsSource="{Binding Path=Source.ProtocolData}" SelectionChanged="CmbSend_SelectionChanged" Height="23" Margin="0 0 0 0"  Width="100"/>
+                                <TextBox Name="txtSend" Height="23" Margin="10 0 0 0" TextWrapping="Wrap" Text="?K" Width="100"/>
+                                <Button x:Name="btnSend" Content="发送" Margin="10 0 0 0"  Width="75" Click="BtnSend_Click"/>
+                               
                             </StackPanel>
-                        </Border>
-                    </StackPanel>
-                    <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10 0 0 0">
-                        <ComboBox Name="cmbSend" SelectedValuePath="Value" DisplayMemberPath="Key" ItemsSource="{Binding Path=Source.ProtocolData}" SelectionChanged="CmbSend_SelectionChanged" Height="23" Margin="0 0 0 0"  Width="200"/>
-                        <TextBox Name="txtSend" Height="23" Margin="10 0 0 0" TextWrapping="Wrap" Text="?K" Width="200"/>
-                        <Button x:Name="btnSend" Content="发送" Margin="10 0 0 0"  Width="75" Click="BtnSend_Click"/>
-                        <Button x:Name="btnTest" Content="测试" Margin="10 0 0 0"  Width="75" Click="BtnTest_Click"/>
-                    </StackPanel>
-                    <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10 0 0 0">
-                        <TextBlock VerticalAlignment="Center">设备列表：</TextBlock>
-                        <ComboBox x:Name="cmbDevices" DisplayMemberPath="NAME" SelectedValuePath="DMAddr_Status" VerticalAlignment="Center" Width="250"></ComboBox>
-                        <Button x:Name="btnDeviceCtl" Content="设备控制" Margin="10 0 0 0"  Width="75" VerticalAlignment="Center" Click="BtnDeviceCtl_Click"/>
-                        <RadioButton x:Name="chkRead" IsChecked="True" Content="读取" GroupName="rw" VerticalAlignment="Center"></RadioButton>
-                        <RadioButton  Content="写入" GroupName="rw" VerticalAlignment="Center"></RadioButton>
-                        <TextBlock Margin="20 0 0 0" VerticalAlignment="Center">值：</TextBlock>
-                        <TextBox x:Name="txtRWValue" Width="60" VerticalAlignment="Center">2</TextBox>
-                        <Button x:Name="btnRobot2" Click="BtnRobot2_Click" Content="2号机器人循环" Width="85" Margin="10 0"/>
-                        <Button x:Name="btnRobot3" Click="BtnRobot3_Click" Margin="10 0" Content="3号机器人循环" Width="85"/>
 
-                    </StackPanel>
+                        </StackPanel>
+                    </Border>
+                    <Border Grid.Row="1" Margin="10 10 0 0" BorderThickness="1" BorderBrush="Blue">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="10 0 0 0" >
+                            <TextBlock >扫码枪：</TextBlock>
+                            <ComboBox Name="combScanner" Width="200" DisplayMemberPath="NAME" SelectedValuePath="IP" ItemsSource="{Binding Path=Source.ScanDevices}" IsSynchronizedWithCurrentItem="True">
+                            </ComboBox>
+                            <Button x:Name="btnScanTest" Content="扫码触发测试" Margin="10 0 0 0"  Width="85" Click="BtnScanTest_Click"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Grid.Row="2" Margin="10 10 0 0" BorderThickness="1" BorderBrush="Red">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10 0 0 0">
+                            <TextBlock VerticalAlignment="Center">设备列表：</TextBlock>
+                            <ComboBox x:Name="cmbDevices" DisplayMemberPath="NAME" SelectedValuePath="DMAddr_Status" VerticalAlignment="Center" Width="250"></ComboBox>
+                            <Button x:Name="btnDeviceCtl" Content="设备控制" Margin="10 0 0 0"  Width="75" VerticalAlignment="Center" Click="BtnDeviceCtl_Click"/>
+                            <RadioButton x:Name="chkRead" IsChecked="True" Content="读取" GroupName="rw" VerticalAlignment="Center"></RadioButton>
+                            <RadioButton  Content="写入" GroupName="rw" VerticalAlignment="Center"></RadioButton>
+                            <TextBlock Margin="20 0 0 0" VerticalAlignment="Center">值：</TextBlock>
+                            <TextBox x:Name="txtRWValue" Width="60" VerticalAlignment="Center">2</TextBox>
+                        </StackPanel>
+                    </Border>
+                    
                 </Grid>
             </TabItem>
         </TabControl>

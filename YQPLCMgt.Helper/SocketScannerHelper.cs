@@ -53,8 +53,8 @@ namespace YQPLCMgt.Helper
                             catch (Exception ex)
                             {
                                 //MyLog.WriteLog(ex, "SCAN");
-                                Thread.Sleep(1000);
                             }
+                            Thread.Sleep(1000);
                         }
                     }, cancellation.Token);
                 }
@@ -78,7 +78,7 @@ namespace YQPLCMgt.Helper
                 int len = socket.Receive(buffer);
                 byte[] bytArrData = buffer.Take(len).ToArray();
                 data = Encoding.ASCII.GetString(bytArrData);
-                MyLog.WriteLog(this.Scanner.NAME + this.Scanner.IP + " 扫码值:" + (string.IsNullOrEmpty(data) ? "空" : data), "SCAN");
+                //MyLog.WriteLog(this.Scanner.NAME + this.Scanner.IP + " 扫码值:" + (string.IsNullOrEmpty(data) ? "空" : data), "SCAN");
             }
             catch (SocketException ex)//接收超时异常不处理
             {
@@ -99,7 +99,7 @@ namespace YQPLCMgt.Helper
                 {
                     try
                     {
-                        socket.Connect(new IPEndPoint(IPAddress.Parse(Scanner.IP), Scanner.Port));
+                        Connect(this.AutoTrigger);
                     }
                     catch
                     {
