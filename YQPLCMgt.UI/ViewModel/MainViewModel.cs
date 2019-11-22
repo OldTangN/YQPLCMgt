@@ -217,12 +217,46 @@ namespace YQPLCMgt.UI.ViewModel
             //格式 条码+\r   0x0D
             List<string> codes = data.Split('\r').ToList();
             codes.RemoveAll(p => string.IsNullOrEmpty(p) || p == "ERROR" || p.Length < 4);
-            if (codes.Count != scan.MaxBarcodeCount)//扫码值超过最大扫码个数
+            if (stopNo == "E00225")//耐压前1号挡停
             {
-                ShowMsg($"有效条码数量{codes.Count}不等于扫码枪限制数量{scan.MaxBarcodeCount}!");
-                return;
-                //codes.RemoveRange(0, codes.Count - scan.MaxBarcodeCount);//保留最后符合数量的扫码值
+                //条码,库编号 识别1、2表位厂内码
+                if (codes.Count != 2)//扫码值超过最大扫码个数
+                {
+                    ShowMsg($"有效条码数量{codes.Count}不等于扫码枪限制数量2!");
+                    return;
+                    //codes.RemoveRange(0, codes.Count - scan.MaxBarcodeCount);//保留最后符合数量的扫码值
+                }
             }
+            else if (stopNo == "E00226")//耐压前2号挡停
+            {
+                //条码,库编号 识别3、4表位厂内码
+                if (codes.Count != 2)//扫码值超过最大扫码个数
+                {
+                    ShowMsg($"有效条码数量{codes.Count}不等于扫码枪限制数量2!");
+                    return;
+                    //codes.RemoveRange(0, codes.Count - scan.MaxBarcodeCount);//保留最后符合数量的扫码值
+                }
+            }
+            else if (stopNo == "E00213") //耐压前3号挡停
+            {
+                //条码,库编号 识别5、6表位厂内码和大托盘码
+                if (codes.Count != 3)//扫码值超过最大扫码个数
+                {
+                    ShowMsg($"有效条码数量{codes.Count}不等于扫码枪限制数量3!");
+                    return;
+                    //codes.RemoveRange(0, codes.Count - scan.MaxBarcodeCount);//保留最后符合数量的扫码值
+                }
+            }
+            else
+            {
+                if (codes.Count != scan.MaxBarcodeCount)//扫码值超过最大扫码个数
+                {
+                    ShowMsg($"有效条码数量{codes.Count}不等于扫码枪限制数量{scan.MaxBarcodeCount}!");
+                    return;
+                    //codes.RemoveRange(0, codes.Count - scan.MaxBarcodeCount);//保留最后符合数量的扫码值
+                }
+            }
+           
             codes.Sort((s1, s2) => { return s2.Length - s1.Length; });//托盘码最后传
 
             foreach (var barcode in codes)
@@ -241,17 +275,17 @@ namespace YQPLCMgt.UI.ViewModel
                     if (stopNo == "E00225")//耐压前1号挡停
                     {
                         //条码,库编号 识别1、2表位厂内码
-                        msg.BAR_CODE = barcode.Replace(",01", ",1").Replace(",02", ",2");
+                        msg.BAR_CODE = barcode.Replace(",01", ",1").Replace(",02", ",6");//1+6
                     }
                     else if (stopNo == "E00226")//耐压前2号挡停
                     {
                         //条码,库编号 识别3、4表位厂内码
-                        msg.BAR_CODE = barcode.Replace(",01", ",3").Replace(",02", ",4");
+                        msg.BAR_CODE = barcode.Replace(",01", ",2").Replace(",02", ",5");//2+5
                     }
-                    else if (stopNo == "E00213") //耐压前3号挡停
+                    else if (stopNo == "E00213") //耐压前3号挡停//3+4
                     {
                         //条码,库编号 识别5、6表位厂内码和大托盘码
-                        msg.BAR_CODE = barcode.Replace(",01", ",5").Replace(",02", ",6").Replace(",03", ",7");
+                        msg.BAR_CODE = barcode.Replace(",01", ",3").Replace(",02", ",4").Replace(",03", ",7");
                     }
                     else
                     {
@@ -265,8 +299,8 @@ namespace YQPLCMgt.UI.ViewModel
                         ShowMsg(logMsg);
                         MyLog.WriteLog(logMsg, "MQ");
                         mqClient?.SentMessage(strJson);
+                        Thread.Sleep(500);
                     }
-                    Thread.Sleep(50);
                 }
                 catch (Exception ex)
                 {

@@ -205,6 +205,7 @@ namespace YQPLCMgt.UI
                 info = new InfoWindow();
                 info.DataContext = viewModel;
                 info.Closed += (p1, p2) => { info = null; };
+                info.Owner = this;
                 info.Show();
             }
         }
