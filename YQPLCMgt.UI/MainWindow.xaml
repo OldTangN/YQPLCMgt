@@ -63,7 +63,8 @@
                                 <ComboBox Name="cmbSend" SelectedValuePath="Value" DisplayMemberPath="Key" ItemsSource="{Binding Path=Source.ProtocolData}" SelectionChanged="CmbSend_SelectionChanged" Height="23" Margin="0 0 0 0"  Width="100"/>
                                 <TextBox Name="txtSend" Height="23" Margin="10 0 0 0" TextWrapping="Wrap" Text="?K" Width="100"/>
                                 <Button x:Name="btnSend" Content="发送" Margin="10 0 0 0"  Width="75" Click="BtnSend_Click"/>
-                               
+                                <Button x:Name="btnTest" Content="测试" Margin="30 0 0 0"  Width="75" Click="btnTest_Click"/>
+
                             </StackPanel>
 
                         </StackPanel>

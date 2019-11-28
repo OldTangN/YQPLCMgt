@@ -221,5 +221,14 @@ namespace YQPLCMgt.UI
                 AppendText("清理完毕！\r\n");
             }
         }
+
+        private void btnTest_Click(object sender, RoutedEventArgs e)
+        {
+            //MessageBox.Show(viewModel.IsCorrectBarcode("\r").ToString());
+            //MessageBox.Show(viewModel.IsCorrectBarcode("12345").ToString());
+            //MessageBox.Show(viewModel.IsCorrectBarcode("a1b23c4d5").ToString());
+            //MessageBox.Show(viewModel.IsCorrectBarcode(".12312?").ToString());
+            //MessageBox.Show(viewModel.IsCorrectBarcode("?12312").ToString());
+        }
     }
 }

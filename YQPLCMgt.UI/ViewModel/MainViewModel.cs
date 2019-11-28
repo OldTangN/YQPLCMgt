@@ -8,6 +8,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Data;
@@ -204,6 +205,17 @@ namespace YQPLCMgt.UI.ViewModel
         #endregion
 
         /// <summary>
+        /// 只包含数字和字母
+        /// </summary>
+        /// <param name="code"></param>
+        /// <returns></returns>
+        public bool IsCorrectBarcode(string code)
+        {
+            Regex regex = new Regex("^[0-9a-zA-Z]*$");
+            return regex.IsMatch(code);
+        }
+
+        /// <summary>
         /// 扫码枪接收回调
         /// </summary>
         /// <param name="scan"></param>
@@ -216,7 +228,7 @@ namespace YQPLCMgt.UI.ViewModel
             RaisePropertyChanged("Scanners");
             //格式 条码+\r   0x0D
             List<string> codes = data.Split('\r').ToList();
-            codes.RemoveAll(p => string.IsNullOrEmpty(p) || p == "ERROR" || p.Length < 4);
+            codes.RemoveAll(p => string.IsNullOrEmpty(p) || p == "ERROR" || p.Length < 4 || !IsCorrectBarcode(p));
             if (stopNo == "E00225")//耐压前1号挡停
             {
                 //条码,库编号 识别1、2表位厂内码
@@ -256,7 +268,7 @@ namespace YQPLCMgt.UI.ViewModel
                     //codes.RemoveRange(0, codes.Count - scan.MaxBarcodeCount);//保留最后符合数量的扫码值
                 }
             }
-           
+
             codes.Sort((s1, s2) => { return s2.Length - s1.Length; });//托盘码最后传
 
             foreach (var barcode in codes)
