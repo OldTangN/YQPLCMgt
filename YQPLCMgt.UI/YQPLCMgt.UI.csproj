@@ -86,6 +86,7 @@
       <DependentUpon>InfoWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Model\TestMsg.cs" />
+    <Compile Include="ViewModel\ForegroundConverter.cs" />
     <Compile Include="ViewModel\BrushConvert.cs" />
     <Compile Include="ViewModel\MainViewModel.cs" />
     <Compile Include="ViewModel\RelayCommand.cs" />

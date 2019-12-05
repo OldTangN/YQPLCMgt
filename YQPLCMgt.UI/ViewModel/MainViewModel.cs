@@ -205,13 +205,13 @@ namespace YQPLCMgt.UI.ViewModel
         #endregion
 
         /// <summary>
-        /// 只包含数字和字母
+        /// 只包含数字和字母和逗号
         /// </summary>
         /// <param name="code"></param>
         /// <returns></returns>
         public bool IsCorrectBarcode(string code)
         {
-            Regex regex = new Regex("^[0-9a-zA-Z]*$");
+            Regex regex = new Regex("^[0-9a-zA-Z,-]*$");
             return regex.IsMatch(code);
         }
 

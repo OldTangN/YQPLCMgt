@@ -3,9 +3,13 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:YQPLCMgt.UI.ViewModel"
         xmlns:local="clr-namespace:YQPLCMgt.UI"
-        mc:Ignorable="d"
-        Title="设备状态查看" Height="600" Width="1000" Closing="Window_Closing" Loaded="Window_Loaded">
+        mc:Ignorable="d" FontSize="14"
+        Title="设备状态查看" Height="800" Width="1200" Closing="Window_Closing" Loaded="Window_Loaded">
+    <Window.Resources>
+        <vm:ForegroundConverter x:Key="converter"></vm:ForegroundConverter>
+    </Window.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="400"></ColumnDefinition>
@@ -17,24 +21,42 @@
                 <RowDefinition></RowDefinition>
             </Grid.RowDefinitions>
             <DataGrid Name="dgStop" IsReadOnly="True" AutoGenerateColumns="False" ItemsSource="{Binding Path=Source.StopDevices}">
+                <DataGrid.RowStyle>
+                    <Style TargetType="{x:Type DataGridRow}">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Path=STATUS,Converter={StaticResource converter}}" Value="True">
+                                <Setter Property="Foreground" Value="Red"></Setter>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </DataGrid.RowStyle>
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="挡停编号" Width="80" Binding="{Binding Path=NO}"></DataGridTextColumn>
-                    <DataGridTextColumn Header="挡停名称" Width="150" Binding="{Binding Path=NAME}"></DataGridTextColumn>
+                    <DataGridTextColumn Header="挡停名称" Width="200" Binding="{Binding Path=NAME}"></DataGridTextColumn>
                     <DataGridTextColumn Header="状态" Width="50" Binding="{Binding Path=STATUS}"></DataGridTextColumn>
                     <DataGridCheckBoxColumn Header="启用" Width="50" Binding="{Binding Path=Enable}"></DataGridCheckBoxColumn>
                 </DataGrid.Columns>
                 <DataGrid.ContextMenu>
                     <ContextMenu>
                         <MenuItem Header="启用/停用" Click="miEnableOrNot_Click"></MenuItem>
-                        <MenuItem Header="重新上传" Click="MiReSendMsg_Click"></MenuItem>                        
+                        <MenuItem Header="重新上传" Click="MiReSendMsg_Click"></MenuItem>
                     </ContextMenu>
                 </DataGrid.ContextMenu>
             </DataGrid>
             <DataGrid Name="dgDevice" Grid.Row="1" IsReadOnly="True" AutoGenerateColumns="False" ItemsSource="{Binding Path=Source.MachineDevices}">
+                <DataGrid.RowStyle>
+                    <Style TargetType="{x:Type DataGridRow}">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Path=STATUS,Converter={StaticResource converter}}" Value="True">
+                                <Setter Property="Foreground" Value="Red"></Setter>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </DataGrid.RowStyle>
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="专机编号" Width="80" Binding="{Binding Path=NO}"></DataGridTextColumn>
                     <DataGridTextColumn Header="专机名称" Width="120" Binding="{Binding Path=NAME}"></DataGridTextColumn>
-                    <DataGridTextColumn Header="状态" Width="50" Binding="{Binding Path=STATUS}"></DataGridTextColumn>
+                    <DataGridTextColumn Foreground="{Binding Path=STATUS,Converter={StaticResource converter}}" Header="状态" Width="50" Binding="{Binding Path=STATUS}"></DataGridTextColumn>
                     <DataGridTextColumn Header="托盘数" Width="50" Binding="{Binding Path=PALLET_COUNT}"></DataGridTextColumn>
                     <DataGridCheckBoxColumn Header="启用" Width="50" Binding="{Binding Path=Enable}"></DataGridCheckBoxColumn>
                 </DataGrid.Columns>
@@ -47,10 +69,19 @@
             </DataGrid>
         </Grid>
         <DataGrid Name="dgScan" IsReadOnly="True" AutoGenerateColumns="False" Grid.Column="1" ItemsSource="{Binding Path=Scanners}">
+            <DataGrid.RowStyle>
+                <Style TargetType="{x:Type DataGridRow}">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding Path=Data,Converter={StaticResource converter}}" Value="True">
+                            <Setter Property="Foreground" Value="Red"></Setter>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </DataGrid.RowStyle>
             <DataGrid.Columns>
                 <DataGridTextColumn Header="扫码枪编号" Width="80" Binding="{Binding Path=NO}"></DataGridTextColumn>
-                <DataGridTextColumn Header="扫码枪名称" Width="120" Binding="{Binding Path=NAME}"></DataGridTextColumn>
-                <DataGridTextColumn Header="扫码值" Width="150" Binding="{Binding Path=Data}"></DataGridTextColumn>
+                <DataGridTextColumn Header="扫码枪名称" Width="200" Binding="{Binding Path=NAME}"></DataGridTextColumn>
+                <DataGridTextColumn Header="扫码值" Width="200" Binding="{Binding Path=Data}"></DataGridTextColumn>
                 <DataGridTextColumn Header="时间" Width="100" Binding="{Binding Path=ScanTime}"></DataGridTextColumn>
                 <DataGridCheckBoxColumn Header="启用" Width="50" Binding="{Binding Path=Enable}"></DataGridCheckBoxColumn>
             </DataGrid.Columns>

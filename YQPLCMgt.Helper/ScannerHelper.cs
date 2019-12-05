@@ -92,9 +92,18 @@ namespace YQPLCMgt.Helper
                     Send(bytStop);
                     Thread.Sleep(100);
                     string data = Receive();
-                    if (string.IsNullOrEmpty(data) || data.Length < 4)//未扫到，重新扫
+                    if (string.IsNullOrEmpty(data) || data.Length < 4)//未扫到，重新扫第一次
                     {
-                        Thread.Sleep(100);
+                        Thread.Sleep(500);
+                        Send(bytStart);
+                        Thread.Sleep(1500);//扫描时间1500ms  不可减少，防止119扫码枪扫码超时
+                        bytStop = new byte[] { 0x16, 0x55, 0x0d };//停止
+                        Send(bytStop);
+                        data = Receive();
+                    }
+                    if (string.IsNullOrEmpty(data) || data.Length < 4)//未扫到，重新扫第二次
+                    {
+                        Thread.Sleep(500);
                         Send(bytStart);
                         Thread.Sleep(1500);//扫描时间1500ms  不可减少，防止119扫码枪扫码超时
                         bytStop = new byte[] { 0x16, 0x55, 0x0d };//停止

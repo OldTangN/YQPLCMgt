@@ -9,15 +9,15 @@ using System.Windows.Media;
 
 namespace YQPLCMgt.UI.ViewModel
 {
-    public class BrushConvert : IValueConverter
+    public class ForegroundConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if ((value as bool?).GetValueOrDefault())
+            if (value?.ToString() != "9" && value?.ToString() != "-1" && !string.IsNullOrEmpty(value?.ToString()))
             {
-                return new SolidColorBrush(Colors.Green);
+                return false;
             }
-            return new SolidColorBrush(Colors.Red);
+            return true;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

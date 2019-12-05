@@ -214,19 +214,18 @@ namespace YQPLCMgt.UI
         {
             if (MessageBox.Show("是否全部重新上传挡停、专机状态，以及扫码枪内容？", "重要提示", MessageBoxButton.YesNo) != MessageBoxResult.Yes)
             {
-                viewModel.Source.MachineDevices?.ForEach(m => m.STATUS = -1);
-                viewModel.Source.StopDevices?.ForEach(s => s.STATUS = -1);
-                viewModel.Source.MachineDevices?.ForEach(m => m.PALLET_COUNT = 0);
                 viewModel.Source.ScanDevices?.ForEach(s => s.Data = "");
+                viewModel.Source.MachineDevices?.ForEach(m => { m.STATUS = -1; m.PALLET_COUNT = 0; });
+                viewModel.Source.StopDevices?.ForEach(s => s.STATUS = -1);
                 AppendText("清理完毕！\r\n");
             }
         }
 
         private void btnTest_Click(object sender, RoutedEventArgs e)
         {
-            //MessageBox.Show(viewModel.IsCorrectBarcode("\r").ToString());
-            //MessageBox.Show(viewModel.IsCorrectBarcode("12345").ToString());
-            //MessageBox.Show(viewModel.IsCorrectBarcode("a1b23c4d5").ToString());
+            MessageBox.Show(viewModel.IsCorrectBarcode("\r").ToString());
+            MessageBox.Show(viewModel.IsCorrectBarcode("1-23-45").ToString());
+            MessageBox.Show(viewModel.IsCorrectBarcode("a1b23c4d5,1").ToString());
             //MessageBox.Show(viewModel.IsCorrectBarcode(".12312?").ToString());
             //MessageBox.Show(viewModel.IsCorrectBarcode("?12312").ToString());
         }
