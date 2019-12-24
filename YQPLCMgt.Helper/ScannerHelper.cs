@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -92,7 +93,7 @@ namespace YQPLCMgt.Helper
                     Send(bytStop);
                     Thread.Sleep(100);
                     string data = Receive();
-                    if (string.IsNullOrEmpty(data) || data.Length < 4)//未扫到，重新扫第一次
+                    if (string.IsNullOrEmpty(data) || data.Length < 4 || !IsCorrectBarcode(data.Replace("\r", "").Replace("\n", "")))//未扫到，重新扫第一次
                     {
                         Thread.Sleep(500);
                         Send(bytStart);
@@ -101,7 +102,7 @@ namespace YQPLCMgt.Helper
                         Send(bytStop);
                         data = Receive();
                     }
-                    if (string.IsNullOrEmpty(data) || data.Length < 4)//未扫到，重新扫第二次
+                    if (string.IsNullOrEmpty(data) || data.Length < 4 || !IsCorrectBarcode(data.Replace("\r", "").Replace("\n", "")))//未扫到，重新扫第二次
                     {
                         Thread.Sleep(500);
                         Send(bytStart);
@@ -123,5 +124,16 @@ namespace YQPLCMgt.Helper
         }
 
         protected abstract string Receive();
+
+        /// <summary>
+        /// 只包含【0-9a-zA-Z,-】
+        /// </summary>
+        /// <param name="code"></param>
+        /// <returns></returns>
+        public static bool IsCorrectBarcode(string code)
+        {
+            Regex regex = new Regex("^[0-9a-zA-Z,-]*$");
+            return regex.IsMatch(code);
+        }
     }
 }

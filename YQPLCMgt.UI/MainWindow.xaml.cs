@@ -223,9 +223,9 @@ namespace YQPLCMgt.UI
 
         private void btnTest_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show(viewModel.IsCorrectBarcode("\r").ToString());
-            MessageBox.Show(viewModel.IsCorrectBarcode("1-23-45").ToString());
-            MessageBox.Show(viewModel.IsCorrectBarcode("a1b23c4d5,1").ToString());
+            //MessageBox.Show(viewModel.IsCorrectBarcode("\r").ToString());
+            //MessageBox.Show(viewModel.IsCorrectBarcode("1-23-45").ToString());
+            //MessageBox.Show(viewModel.IsCorrectBarcode("a1b23c4d5,1").ToString());
             //MessageBox.Show(viewModel.IsCorrectBarcode(".12312?").ToString());
             //MessageBox.Show(viewModel.IsCorrectBarcode("?12312").ToString());
         }

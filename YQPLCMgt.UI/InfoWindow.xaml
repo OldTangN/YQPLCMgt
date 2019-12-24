@@ -68,29 +68,39 @@
                 </DataGrid.ContextMenu>
             </DataGrid>
         </Grid>
-        <DataGrid Name="dgScan" IsReadOnly="True" AutoGenerateColumns="False" Grid.Column="1" ItemsSource="{Binding Path=Scanners}">
-            <DataGrid.RowStyle>
-                <Style TargetType="{x:Type DataGridRow}">
-                    <Style.Triggers>
-                        <DataTrigger Binding="{Binding Path=Data,Converter={StaticResource converter}}" Value="True">
-                            <Setter Property="Foreground" Value="Red"></Setter>
-                        </DataTrigger>
-                    </Style.Triggers>
-                </Style>
-            </DataGrid.RowStyle>
-            <DataGrid.Columns>
-                <DataGridTextColumn Header="扫码枪编号" Width="80" Binding="{Binding Path=NO}"></DataGridTextColumn>
-                <DataGridTextColumn Header="扫码枪名称" Width="200" Binding="{Binding Path=NAME}"></DataGridTextColumn>
-                <DataGridTextColumn Header="扫码值" Width="200" Binding="{Binding Path=Data}"></DataGridTextColumn>
-                <DataGridTextColumn Header="时间" Width="100" Binding="{Binding Path=ScanTime}"></DataGridTextColumn>
-                <DataGridCheckBoxColumn Header="启用" Width="50" Binding="{Binding Path=Enable}"></DataGridCheckBoxColumn>
-            </DataGrid.Columns>
-            <DataGrid.ContextMenu>
-                <ContextMenu>
-                    <MenuItem Header="启用/停用" Click="miEnableOrNot_Click"></MenuItem>
-                    <MenuItem Header="触发扫码" Click="MiReScan_Click"></MenuItem>
-                </ContextMenu>
-            </DataGrid.ContextMenu>
-        </DataGrid>
+        <Grid  Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition></RowDefinition>
+                <RowDefinition Height="150"></RowDefinition>
+            </Grid.RowDefinitions>
+            <DataGrid Name="dgScan" IsReadOnly="True" AutoGenerateColumns="False" ItemsSource="{Binding Path=Scanners}">
+                <DataGrid.RowStyle>
+                    <Style TargetType="{x:Type DataGridRow}">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Path=Data,Converter={StaticResource converter}}" Value="True">
+                                <Setter Property="Foreground" Value="Red"></Setter>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </DataGrid.RowStyle>
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="扫码枪编号" Width="80" Binding="{Binding Path=NO}"></DataGridTextColumn>
+                    <DataGridTextColumn Header="扫码枪名称" Width="200" Binding="{Binding Path=NAME}"></DataGridTextColumn>
+                    <DataGridTextColumn Header="档停状态" Width="80" Binding="{Binding Path=Stop.STATUS}"></DataGridTextColumn>
+                    <DataGridTextColumn Header="扫码值" Width="200" Binding="{Binding Path=Data}"></DataGridTextColumn>
+                    <DataGridTextColumn Header="时间" Width="100" Binding="{Binding Path=ScanTime}"></DataGridTextColumn>
+                    <DataGridCheckBoxColumn Header="启用" Width="50" Binding="{Binding Path=Enable}"></DataGridCheckBoxColumn>
+                </DataGrid.Columns>
+                <DataGrid.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="启用/停用" Click="miEnableOrNot_Click"></MenuItem>
+                        <MenuItem Header="触发扫码" Click="MiReScan_Click"></MenuItem>
+                    </ContextMenu>
+                </DataGrid.ContextMenu>
+            </DataGrid>
+            <Button Grid.Row="1" Margin="0 0 200 0" Width="100" Height="35" Name="btnSaveCfg" Click="BtnSaveCfg_Click"
+                    HorizontalAlignment="Right" VerticalAlignment="Center" Content="保存配置"></Button>
+        </Grid>
+    
     </Grid>
 </Window>

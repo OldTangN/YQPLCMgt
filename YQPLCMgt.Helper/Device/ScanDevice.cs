@@ -37,5 +37,8 @@ namespace YQPLCMgt.Helper
 
         private string _ScanTime;
         public string ScanTime { get => _ScanTime; set => Set(ref _ScanTime, value); }
+
+        private StopDevice _stop;
+        public StopDevice Stop { get => _stop; set => Set(ref _stop, value); }
     }
 }

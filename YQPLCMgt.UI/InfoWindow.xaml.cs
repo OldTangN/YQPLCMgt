@@ -119,7 +119,7 @@ namespace YQPLCMgt.UI
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            SaveCfg();
+           
         }
 
         private MainViewModel viewModel;
@@ -189,31 +189,31 @@ namespace YQPLCMgt.UI
                     }
                     else if (device is ScanDevice)
                     {
-                        //try
-                        //{
-                        //    ScanDevice scan = device as ScanDevice;
-                        //    string[] arrBarcode = scan.Data.Split('|');
-                        //    foreach (var barcode in arrBarcode)
-                        //    {
-                        //        if (string.IsNullOrEmpty(barcode))
-                        //        {
-                        //            continue;
-                        //        }
-                        //        BarcodeMsg msg = new BarcodeMsg(scan.NO)
-                        //        {
-                        //            NO = scan.NO,
-                        //            BAR_CODE = barcode,
-                        //        };
-                        //        string strMsg = JsonConvert.SerializeObject(msg);
-                        //        viewModel?.mqClient?.SentMessage(strMsg);
-                        //    }
-                        //    MessageBox.Show("发送挡停信息完毕！");
-                        //}
-                        //catch (Exception ex)
-                        //{
-                        //    MyLogLib.MyLog.WriteLog("手动发送扫码信息失败！", ex);
-                        //    MessageBox.Show("发送扫码信息失败！");
-                        //}
+                        try
+                        {
+                            StopDevice stop = (device as ScanDevice).Stop;
+                            if (stop == null)
+                            {
+                                return;
+                            }
+                            PLCMsg msg = new PLCMsg()
+                            {
+                                NO = stop.NO,
+                                DEVICE_TYPE = stop.DEVICE_TYPE,
+                                PALLET_COUNT = stop.PALLET_COUNT,
+                                STATUS = stop.STATUS,
+                                MESSAGE_TYPE = "plc",
+                                time_stamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff")
+                            };
+                            string strMsg = JsonConvert.SerializeObject(msg);
+                            viewModel?.mqClient?.SentMessage(strMsg);
+                            MessageBox.Show("上传档停状态完毕！");
+                        }
+                        catch (Exception ex)
+                        {
+                            MyLogLib.MyLog.WriteLog("手动发送挡停信息失败！", ex);
+                            MessageBox.Show("发送挡停信息失败！");
+                        }
                     }
                 }
             }
@@ -229,7 +229,7 @@ namespace YQPLCMgt.UI
                 foreach (var item in dataGrid.SelectedItems)
                 {
                     ScanDevice scan = item as ScanDevice;
-                    var stop = viewModel.Source.StopDevices.FirstOrDefault(p => p.Scan_Device_No == scan.NO);
+                    var stop = viewModel.Source.StopDevices.FirstOrDefault(p => p.Scan_Device_No == scan.NO && p.STATUS == 1);
                     if (stop == null || string.IsNullOrEmpty(stop.Scan_Device_No))
                     {
                         continue;
@@ -237,6 +237,12 @@ namespace YQPLCMgt.UI
                     viewModel.TriggerScan(stop);
                 }
             }
+        }
+
+        private void BtnSaveCfg_Click(object sender, RoutedEventArgs e)
+        {
+            SaveCfg();
+            MessageBox.Show("保存完毕！");
         }
     }
 }

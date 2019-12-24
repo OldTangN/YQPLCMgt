@@ -76,6 +76,7 @@ namespace YQPLCMgt.UI.ViewModel
             MachineAndStop.AddRange(Source.StopDevices);
             MachineAndStop.AddRange(Source.MachineDevices);
             Scanners = new List<DeviceBase>();
+            Source.ScanDevices.ForEach(scan => scan.Stop = Source.StopDevices.FirstOrDefault(stop => stop.Scan_Device_No == scan.NO));
             Scanners.AddRange(Source.ScanDevices);
         }
 
@@ -205,30 +206,19 @@ namespace YQPLCMgt.UI.ViewModel
         #endregion
 
         /// <summary>
-        /// 只包含数字和字母和逗号
-        /// </summary>
-        /// <param name="code"></param>
-        /// <returns></returns>
-        public bool IsCorrectBarcode(string code)
-        {
-            Regex regex = new Regex("^[0-9a-zA-Z,-]*$");
-            return regex.IsMatch(code);
-        }
-
-        /// <summary>
         /// 扫码枪接收回调
         /// </summary>
         /// <param name="scan"></param>
         /// <param name="strCodes"></param>
         private void ScannedCallback(ScanDevice scan, string stopNo, string data)
         {
-            ShowMsg("扫码:" + scan.IP + " -- " + data);
+            ShowMsg("扫码:" + scan.IP + " -- " + scan.NAME + " -- " + data);
             scan.Data = "";//data?.Replace("\r", " | ").Replace("\n", "");
             scan.ScanTime = DateTime.Now.ToString("HH:mm:ss");
             RaisePropertyChanged("Scanners");
             //格式 条码+\r   0x0D
             List<string> codes = data.Split('\r').ToList();
-            codes.RemoveAll(p => string.IsNullOrEmpty(p) || p == "ERROR" || p.Length < 4 || !IsCorrectBarcode(p));
+            codes.RemoveAll(p => string.IsNullOrEmpty(p) || p == "ERROR" || p.Length < 4 || !ScannerHelper.IsCorrectBarcode(p));
             if (stopNo == "E00225")//耐压前1号挡停
             {
                 //条码,库编号 识别1、2表位厂内码
@@ -308,7 +298,7 @@ namespace YQPLCMgt.UI.ViewModel
                     {
                         string strJson = JsonConvert.SerializeObject(msg);
                         string logMsg = "发送:" + strJson;
-                        ShowMsg(logMsg);
+                        //ShowMsg(logMsg);
                         MyLog.WriteLog(logMsg, "MQ");
                         mqClient?.SentMessage(strJson);
                         Thread.Sleep(500);
@@ -352,7 +342,7 @@ namespace YQPLCMgt.UI.ViewModel
         private void MqClient_singleArrivalEvent(string data)
         {
             MyLog.WriteLog("接收:" + data, "MQ");
-            ShowMsg(data);
+            //ShowMsg(data);
             MsgBase msg = null;
             try
             {
@@ -370,11 +360,12 @@ namespace YQPLCMgt.UI.ViewModel
             {
                 return;
             }
-            if ((DateTime.Now - dtMsg).Seconds > 3 * 60000)
-            {
-                ShowMsg("3分钟之前的消息不处理！");
-                return;
-            }
+            //if ((DateTime.Now - dtMsg).TotalSeconds > 180)
+            //{
+            //    ShowMsg("3分钟之前的消息不处理！");
+            //    return;
+            //}
+
             try
             {
                 if (msg.MESSAGE_TYPE == "control")
@@ -449,7 +440,7 @@ namespace YQPLCMgt.UI.ViewModel
                 respMsg.STATUS = STATUS;
                 string strJson = JsonConvert.SerializeObject(respMsg);
                 string logMsg = "应答:" + strJson;
-                ShowMsg(logMsg);
+                //ShowMsg(logMsg);
                 MyLog.WriteLog(logMsg, "MQ");
                 mqClient?.SentMessage(strJson);
             }
@@ -611,7 +602,7 @@ namespace YQPLCMgt.UI.ViewModel
                         {
                             string strJson = JsonConvert.SerializeObject(plcMsg);
                             string logMsg = "发送:" + strJson;
-                            ShowMsg(logMsg);
+                            //ShowMsg(logMsg);
                             MyLog.WriteLog(logMsg, "MQ");
                             mqClient?.SentMessage(strJson);
                         }
@@ -661,7 +652,7 @@ namespace YQPLCMgt.UI.ViewModel
                         {
                             string strJson = JsonConvert.SerializeObject(plcMsg);
                             string logMsg = "发送:" + strJson;
-                            ShowMsg(logMsg);
+                            //ShowMsg(logMsg);
                             MyLog.WriteLog(logMsg, "MQ");
                             mqClient?.SentMessage(strJson);
                         }
