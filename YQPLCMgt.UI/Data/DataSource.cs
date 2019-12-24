@@ -15,10 +15,7 @@ namespace YQPLCMgt.UI
         /// </summary>
         public Dictionary<string, string> ProtocolData { get; set; }
 
-        /// <summary>
-        /// PLC错误信息
-        /// </summary>
-        public Dictionary<string, string> ErrorMsg { get; set; }
+       
 
         /// <summary>
         /// PLC控制挡停和专机的DM值表
@@ -33,11 +30,9 @@ namespace YQPLCMgt.UI
         public DataSource()
         {
             this.ProtocolData = new Dictionary<string, string>();
-            this.ErrorMsg = new Dictionary<string, string>();
             this.StopDevices = new List<StopDevice>();
             this.ScanDevices = new List<ScanDevice>();
             this.MachineDevices = new List<MachineDevice>();
-            InitErrorMsg();
             InitProtocolData();
             InitStopDevice();
             InitScanDevice();
@@ -56,19 +51,6 @@ namespace YQPLCMgt.UI
             this.ProtocolData.Add("连接数据读取S", "RDS DM00001.U 2");
             this.ProtocolData.Add("数据写入", "WR DM00001.U 10");
             this.ProtocolData.Add("连接数据写入S", "WRS DM00001.U 2 1 2");
-        }
-
-        /// <summary>
-        /// PLC错误信息
-        /// </summary>
-        private void InitErrorMsg()
-        {
-            this.ErrorMsg.Add("E0", "软元件编号异常");
-            this.ErrorMsg.Add("E1", "指令异常");
-            this.ErrorMsg.Add("E2", "程序未登陆");
-            this.ErrorMsg.Add("E4", "禁止写入");
-            this.ErrorMsg.Add("E5", "主机错误");
-            this.ErrorMsg.Add("E6", "无注释");
         }
 
         /// <summary>

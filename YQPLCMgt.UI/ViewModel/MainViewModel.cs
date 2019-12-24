@@ -510,11 +510,6 @@ namespace YQPLCMgt.UI.ViewModel
                                 ShowMsg(response.ErrorMsg);
                                 continue;
                             }
-                            if (_Source.ErrorMsg.Keys.Contains(response.Text))
-                            {
-                                ShowMsg(_Source.ErrorMsg[response.Text]);
-                                continue;
-                            }
 
                             string[] getStrs = response.Text.Split(' ').ToArray();
                             int[] getValues = new int[getStrs.Length];

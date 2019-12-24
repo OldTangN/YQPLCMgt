@@ -12,6 +12,28 @@ namespace YQPLCMgt.Helper
 {
     public class PLCHelper
     {
+        private static Dictionary<string, string> _ErrorMsg;
+        /// <summary>
+        /// PLC错误信息
+        /// </summary>
+        public static Dictionary<string, string> ErrorMsg
+        {
+            get
+            {
+                if (_ErrorMsg == null)
+                {
+                    _ErrorMsg = new Dictionary<string, string>();
+                    _ErrorMsg.Add("E0", "软元件编号异常");
+                    _ErrorMsg.Add("E1", "指令异常");
+                    _ErrorMsg.Add("E2", "程序未登陆");
+                    _ErrorMsg.Add("E4", "禁止写入");
+                    _ErrorMsg.Add("E5", "主机错误");
+                    _ErrorMsg.Add("E6", "无注释");
+                }
+                return _ErrorMsg;
+            }
+        }
+
         public string IP { get; private set; }
         public int Port { get; private set; }
         public int SendTimeout { get; private set; }
@@ -151,6 +173,12 @@ namespace YQPLCMgt.Helper
                     {
                         ShowMsg(rcvMsg);
                     }
+                    if (PLCHelper.ErrorMsg.Keys.Contains(resp.Text))
+                    {
+                        resp.HasError = true;
+                        resp.ErrorMsg = PLCHelper.ErrorMsg[resp.Text];
+                        MyLog.WriteLog("[" + this.IP + "] PLC响应异常！" + resp.ErrorMsg, "PLC");
+                    }
                     //MyLog.WriteLog(rcvMsg,"PLC");
                 }
                 catch (Exception ex)
@@ -177,14 +205,14 @@ namespace YQPLCMgt.Helper
 
         public PLCResponse SetOnePoint(string ioPoint, int val)
         {
-            MyLog.WriteLog($"{this.IP}设置{ioPoint}:{val}","PLC");
+            MyLog.WriteLog($"{this.IP}设置{ioPoint}:{val}", "PLC");
             return Send($"WR {ioPoint} {val}\r");
         }
 
         public PLCResponse ReadOnePoint(string ioPoint)
         {
             MyLog.WriteLog($"{this.IP}读取{ioPoint}", "PLC");
-            return Send($"RD {ioPoint}.U\r");           
+            return Send($"RD {ioPoint}.U\r");
         }
         private byte[] Encode(string msg)
         {
